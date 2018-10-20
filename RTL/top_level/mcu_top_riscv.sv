@@ -1,5 +1,6 @@
-module mcu_top_riscv ();
+`include "axi_bus.sv"
 
+module mcu_top_riscv ();
 
 /*
 --------------------------------------------------
@@ -91,6 +92,37 @@ riscv_core_instance
 
 /*
 --------------------------------------------------
+                 Core 2 Axi
+-------------------------------------------------
+*/
+
+core2axi_wrap
+#(
+  .AXI_ADDR_WIDTH   ( `AXI_ADDR_WIDTH      ),
+  .AXI_ID_WIDTH     ( `AXI_ID_MASTER_WIDTH ),
+  .AXI_DATA_WIDTH   ( `AXI_DATA_WIDTH      ),
+  .AXI_USER_WIDTH   ( `AXI_USER_WIDTH      ),
+  .REGISTERED_GRANT ( "FALSE"             )
+)
+core2axi_instance
+(
+  .clk_i         ( clk             ),
+  .rst_ni        ( rst_n           ),
+
+  .data_req_i    ( core_axi_req    ),
+  .data_gnt_o    ( core_axi_gnt    ),
+  .data_rvalid_o ( core_axi_rvalid ),
+  .data_addr_i   ( core_axi_addr   ),
+  .data_we_i     ( core_axi_we     ),
+  .data_be_i     ( core_axi_be     ),
+  .data_rdata_o  ( core_axi_rdata  ),
+  .data_wdata_i  ( core_axi_wdata  ),
+
+  .master        ( core_master_int )
+);
+
+/*
+--------------------------------------------------
               AXI Bus Interconnect
 -------------------------------------------------
 */
@@ -117,7 +149,62 @@ axi_node_intf_wrap
   .start_addr_i (),
   .end_addr_i   ()
 
-
 )
+
+/*
+--------------------------------------------------
+                AXI2APB Bridge
+-------------------------------------------------
+*/
+
+axi2apb_wrap
+#(
+    parameter AXI_ADDR_WIDTH   = 32,
+    parameter AXI_DATA_WIDTH   = 32,
+    parameter AXI_USER_WIDTH   = 6,
+    parameter AXI_ID_WIDTH     = 6,
+    parameter APB_ADDR_WIDTH   = 32
+) axi2apb_wrap_instance
+(
+    .clk_i        (),
+    .rst_ni       (),
+    .test_en_i    (),
+
+    .axi_slave    (),
+
+    .apb_master   ()
+
+);
+
+/*
+-------------------------------------------------
+                    APB UART
+-------------------------------------------------
+*/
+
+apb_uart_sv
+#(
+    parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
+) apb_uart_sv_instance
+(
+    .CLK        ()
+    .RSTN       (),
+    /* verilator lint_off UNUSED */
+    .PADDR      (),
+    /* lint_on */
+    .PWDATA     (),
+    .PWRITE     (),
+    .PSEL       (),
+    .PENABLE    (),
+    .PRDATA     (),
+    .PREADY     (),
+    .PSLVERR    (),
+
+    .rx_i       (),     // Receiver input
+    .tx_o       (),     // Transmitter output
+
+    .event_o    ()      // interrupt/event output
+);
+
 
 endmodule;
