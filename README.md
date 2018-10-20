@@ -27,6 +27,6 @@ A DE10nano FPGA board from Altera will be the target device for the system.
 # Folder strucure:
 
 * Doc - Relevant documentation and recomended sources for project design;
-* Project - Main project folder - it will contain the Quartus II 18.1 project files
+* Project - Main project folder - it will contain the Quartus II 18.1 and Eclipse project files
 * RTL - Hardware description source files - it will include all IPs and self-made designs used in the project
 * Tesbench - Main testbenches files and definitions
