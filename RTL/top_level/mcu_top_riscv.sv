@@ -6,6 +6,7 @@ module mcu_top_riscv ();
               RISCV Core instance
 -------------------------------------------------
 */
+
 riscv_core_instance
 #(
   .N_EXT_PERF_COUNTERS (     0       ),
@@ -87,5 +88,36 @@ riscv_core_instance
 
   .ext_perf_counters_i
 );
+
+/*
+--------------------------------------------------
+              AXI Bus Interconnect
+-------------------------------------------------
+*/
+
+axi_node_intf_wrap
+#(
+  .NB_MASTER      ( 2                    ),	// AXI Masters: RISCV core
+  .NB_SLAVE       ( 2                    ),	// AXI Slaves:  Data Memory, UART
+  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH      ),
+  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
+  .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
+  .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
+) axi_bus_interconnect (
+
+  .clk          (),
+  .rst_n        (),
+  .test_en_i    (),
+
+  .slave        (),
+
+  .master       (),
+
+  // Memory map
+  .start_addr_i (),
+  .end_addr_i   ()
+
+
+)
 
 endmodule;
