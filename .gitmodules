@@ -1,0 +1,3 @@
+[submodule "RTL/pulpino"]
+	path = RTL/pulpino
+	url = https://github.com/pulp-platform/pulpino.git
