@@ -1,6 +1,6 @@
 # RISCV_MCU_CYCLONEV
 
-An basic implementation of the RISCV core into a DE10nano FPGA board. Its main componentes will be featured from the [Pulpino Project](https://github.com/pulp-platform/pulpino).
+A basic implementation of the RISCV core into a DE10nano FPGA board. Its main componentes will be featured from the [Pulpino Project](https://github.com/pulp-platform/pulpino).
 
 # Components:
 
@@ -17,7 +17,7 @@ Implement a fully functional system for basic aplications, which will include:
   * A fully constrained soft-core FPGA design;
   * An Eclipse project with target configuration set;
   * Some API/Drivers to enable peripheral usage.
-
+  
 # Plataform
 
 A DE10nano FPGA board from Altera will be the target device for the system.
