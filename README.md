@@ -1,5 +1,7 @@
 # RISCV_MCU_CYCLONEV
 
+![MCU Architecture](Doc/RISCV_MCU_CYCLONEV.png)
+
 A basic implementation of the RISCV core into a DE10nano FPGA board. Its main componentes will be featured from the [Pulpino Project](https://github.com/pulp-platform/pulpino).
 
 # Components:
