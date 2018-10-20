@@ -20,9 +20,9 @@ Implement a fully functional system for basic aplications, which will include:
 
 # Plataform
 
-A DE10nano FPGA board from Altera will be the target device for the system. Thus, the Quartus II software will be used.
-The project will be featured in the 13.1 version of the tool, under personal preference.
-To simulate the project, the Modelsim 10.5b version will be used.
+A DE10nano FPGA board from Altera will be the target device for the system.
+* Syntehsis tool: Quartus II v13.1 - the project will be featured in the 13.1 version of the tool, under personal preference.
+* Simulation tool: Modelsim 10.5b.
 
 # Folder strucure:
 
