@@ -17,11 +17,11 @@ Implement a fully functional system for basic aplications, which will include:
   * A fully constrained soft-core FPGA design;
   * An Eclipse project with target configuration set;
   * Some API/Drivers to enable peripheral usage.
-  
+
 # Plataform
 
 A DE10nano FPGA board from Altera will be the target device for the system.
-* Syntehsis tool: Quartus II v13.1 - the project will be featured in the 13.1 version of the tool, under personal preference.
+* Syntehsis tool: Quartus II v18.1 
 * Simulation tool: Modelsim 10.5b.
 
 # Folder strucure:
