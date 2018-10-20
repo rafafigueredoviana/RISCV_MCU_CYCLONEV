@@ -159,11 +159,11 @@ axi_node_intf_wrap
 
 axi2apb_wrap
 #(
-    parameter AXI_ADDR_WIDTH   = 32,
-    parameter AXI_DATA_WIDTH   = 32,
-    parameter AXI_USER_WIDTH   = 6,
-    parameter AXI_ID_WIDTH     = 6,
-    parameter APB_ADDR_WIDTH   = 32
+    .AXI_ADDR_WIDTH (32),
+    .AXI_DATA_WIDTH (32),
+    .AXI_USER_WIDTH (6),
+    .AXI_ID_WIDTH   (6),
+    .APB_ADDR_WIDTH (32)
 ) axi2apb_wrap_instance
 (
     .clk_i        (),
@@ -178,13 +178,43 @@ axi2apb_wrap
 
 /*
 -------------------------------------------------
+               APB Bus Interconnect
+-------------------------------------------------
+*/
+
+periph_bus_wrap
+  #(
+    .APB_ADDR_WIDTH (32),
+    .APB_DATA_WIDTH (32)
+    ) periph_bus_wrap_instance
+   (
+    .clk_i            (),
+    .rst_ni           (),
+
+    .apb_slave        (),
+
+    .uart_master      (),
+    .gpio_master      (),
+    .spi_master       (),
+    .timer_master     (),
+    .event_unit_master(),
+    .i2c_master       (),
+    .fll_master       (),
+    .soc_ctrl_master  (),
+    .debug_master     ()
+
+    );
+
+
+/*
+-------------------------------------------------
                     APB UART
 -------------------------------------------------
 */
 
 apb_uart_sv
 #(
-    parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
+    .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
 ) apb_uart_sv_instance
 (
     .CLK        ()
@@ -206,5 +236,35 @@ apb_uart_sv
     .event_o    ()      // interrupt/event output
 );
 
+/*
+-------------------------------------------------
+                    APB GPIO
+-------------------------------------------------
+*/
+
+apb_gpio
+#(
+    .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
+) apb_gpio_instance
+(
+    .HCLK         (),
+    .HRESETn      (),
+    .PADDR        (),
+    .PWDATA       (),
+    .PWRITE       (),
+    .PSEL         (),
+    .PENABLE      (),
+    .PRDATA       (),
+    .PREADY       (),
+    .PSLVERR      (),
+
+    .gpio_in      (),
+    .gpio_in_sync (),
+    .gpio_out     (),
+    .gpio_dir     (),
+    .gpio_padcfg  (),
+    .power_event  (),
+    .interrupt    ()
+);
 
 endmodule;

@@ -10,6 +10,7 @@ Note: As the system is built, its components will be described here.
 
 * A 32-bit RISCV core with FPU and a small set of interrupts
 * A UART peripheral;
+* A GPIO peripheral;
 * 32KB (?) General Data Memory;
 * An AXI-4 bus for peripheral interconnect.
 
