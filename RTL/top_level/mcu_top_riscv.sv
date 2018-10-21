@@ -127,7 +127,7 @@ riscv_core_instance
 
   // Instruction memory interface
   .instr_req_o           (instruction_request_output    ),
-  .instr_gnt_i           (instruction_granted_input     ),
+  .instr_gnt_i           (instruction_request_output    ),
   .instr_rvalid_i        (instruction_read_valid_input  ),
   .instr_addr_o          (instruction_address_output    ),
   .instr_rdata_i         (instruction_read_data_input   ),
@@ -185,6 +185,42 @@ riscv_core_instance
 
   .ext_perf_counters_i  ()
 );
+
+/*
+-------------------------------------------------
+              Instruction RAM
+-------------------------------------------------
+*/
+
+instr_ram_wrap
+  #(
+    .RAM_SIZE (INSTR_RAM_SIZE),                // in bytes
+  ) instruction_ram_wrap_instance (
+    // Clock and Reset
+    .clk            (clk                          ),
+    .rst_n          (reset_n_sync                 ),
+
+    .en_i           (instruction_request_output   ),
+    .addr_i         (instruction_address_output   ),
+    .wdata_i        ('0                           ),
+    .rdata_o        (instruction_read_data_input  ),
+    .we_i           ('0                           ),
+    .be_i           ('1                           ),
+    .bypass_en_i    ('0                           )
+  );
+
+always_ff @ (posedge clk, negedge reset_n_sync)
+begin
+  if (!reset_n_sync)
+    begin
+      instruction_read_valid_input <= 1'b0;
+    end
+  else
+    begin
+      instruction_read_valid_input <= instruction_request_output;
+    end
+
+end
 
 /*
 -------------------------------------------------
