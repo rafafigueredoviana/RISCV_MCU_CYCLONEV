@@ -49,7 +49,34 @@ wire [31:0]   data_write_data_output;
 wire [31:0]   data_read_data_input;
 
 
+// AXI Bus creation
 
+AXI_BUS
+#(
+  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH     ),
+  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH     ),
+  .AXI_ID_WIDTH   ( `AXI_ID_SLAVE_WIDTH ),
+  .AXI_USER_WIDTH ( `AXI_USER_WIDTH     )
+)
+slaves[1:0]();
+
+AXI_BUS
+#(
+  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH     ),
+  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH     ),
+  .AXI_ID_WIDTH   ( `AXI_ID_SLAVE_WIDTH ),
+  .AXI_USER_WIDTH ( `AXI_USER_WIDTH     )
+)
+masters[1:0]();
+
+// AXI2MEM Signals
+
+wire          axi_memory_data_request_output;
+wire          axi_memory_data_write_enable_output;
+wire [ 3:0]   axi_memory_data_byte_enable_output;
+wire [31:0]   axi_memory_data_address_output;
+wire [31:0]   axi_memory_data_write_data_output;
+wire [31:0]   axi_memory_data_read_data_input;
 
 /*
 -------------------------------------------------
@@ -178,7 +205,7 @@ core2axi_instance
   .data_wdata_i  ( data_write_data_output   ),
   .data_rdata_o  ( data_read_data_input     ),
 
-  .master        ( core_master_int          )
+  .master        ( masters[0]               )
 );
 
 /*
@@ -199,11 +226,11 @@ axi_node_intf_wrap
 
   .clk          (clk),
   .rst_n        (reset_n_sync),
-  .test_en_i    (),
+  .test_en_i    ('0),
 
-  .slave        (),
+  .slave        (masters), //CORE2AXI -> AXIBUS
 
-  .master       (),
+  .master       (slaves), // CORE2AXI -> AXIBUS -> AXIPERIPHERALS
 
   // Memory map
   .start_addr_i (),
@@ -211,22 +238,59 @@ axi_node_intf_wrap
 
 )
 
+/*
+-------------------------------------------------
+                 AXI2Memory Bridge
+-------------------------------------------------
+*/
+
+axi_mem_if_SP_wrap
+#(
+  .AXI_ADDR_WIDTH  ( AXI_ADDR_WIDTH     ),
+  .AXI_DATA_WIDTH  ( AXI_DATA_WIDTH     ),
+  .AXI_ID_WIDTH    ( AXI_ID_SLAVE_WIDTH ),
+  .AXI_USER_WIDTH  ( AXI_USER_WIDTH     ),
+  .MEM_ADDR_WIDTH  ( DATA_ADDR_WIDTH    )
+)
+data_mem_axi_if
+(
+  .clk         ( clk                                 ),
+  .rst_n       ( reset_n_sync                        ),
+  .test_en_i   ( '0                                  ),
+
+  .mem_req_o   ( axi_memory_data_request_output      ),
+  .mem_we_o    ( axi_memory_data_write_enable_output ),
+  .mem_be_o    ( axi_memory_data_byte_enable_output  ),
+  .mem_addr_o  ( axi_memory_data_address_output      ),
+  .mem_wdata_o ( axi_memory_data_write_data_output   ),
+  .mem_rdata_i ( axi_memory_data_read_data_input     ),
+
+  .slave       ( slaves[0]                           )  // CORE2AXI -> AXIBUS -> AXIMEM
+);
+
+/*
+-------------------------------------------------
+             General Data RAM
+-------------------------------------------------
+*/
+
 sp_ram_wrap
   #(
-    .RAM_SIZE   (DATA_RAM_SIZE    ),              // in bytes
-    .ADDR_WIDTH ($clog2(RAM_SIZE) ),
-    .DATA_WIDTH (32               )
+    .RAM_SIZE   (DATA_RAM_SIZE                      ), // in bytes
+    .ADDR_WIDTH ($clog2(RAM_SIZE)                   ),
+    .DATA_WIDTH (32                                 )
   )(
     // Clock and Reset
-    .clk        (clock),
-    .rstn_i     (reset_n_sync),
-    .en_i       (),
-    .addr_i     (),
-    .wdata_i    (),
-    .rdata_o    (),
-    .we_i       (),
-    .be_i       (),
-    .bypass_en_i()
+    .clk        (clock                              ),
+    .rstn_i     (reset_n_sync                       ),
+    .en_i       (axi_memory_data_request_output     ),
+    .we_i       (axi_memory_data_write_enable_output),
+    .be_i       (axi_memory_data_byte_enable_output ),
+    .addr_i     (axi_memory_data_address_output     ),
+    .wdata_i    (axi_memory_data_write_data_output  ),
+    .rdata_o    (axi_memory_data_read_data_input    ),
+
+    .bypass_en_i('0                                 )
   );
 
 /*
@@ -237,11 +301,11 @@ sp_ram_wrap
 
 axi2apb_wrap
 #(
-    .AXI_ADDR_WIDTH (32),
-    .AXI_DATA_WIDTH (32),
-    .AXI_USER_WIDTH ( 6),
-    .AXI_ID_WIDTH   ( 6),
-    .APB_ADDR_WIDTH (32)
+    .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH),
+    .AXI_DATA_WIDTH (AXI_DATA_WIDTH),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH),
+    .AXI_ID_WIDTH   ( AXI_ID_SLAVE_WIDTH),
+    .APB_ADDR_WIDTH (APB_ADDR_WIDTH)
 ) axi2apb_wrap_instance
 (
     .clk_i        (clock),
@@ -262,8 +326,8 @@ axi2apb_wrap
 
 periph_bus_wrap
   #(
-    .APB_ADDR_WIDTH (32),
-    .APB_DATA_WIDTH (32)
+    .APB_ADDR_WIDTH (APB_ADDR_WIDTH),
+    .APB_DATA_WIDTH (APB_DATA_WIDTH)
     ) periph_bus_wrap_instance
    (
     .clk_i            (clock),
@@ -292,7 +356,7 @@ periph_bus_wrap
 
 apb_uart_sv
 #(
-    .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
+    .APB_ADDR_WIDTH (APB_ADDR_WIDTH)  //APB slaves are 4KB by default - 12 bits
 ) apb_uart_sv_instance
 (
     .CLK        (clock)
@@ -322,7 +386,7 @@ apb_uart_sv
 
 apb_gpio
 #(
-    .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
+    .APB_ADDR_WIDTH (APB_ADDR_WIDTH)  //APB slaves are 4KB by default - 12 bits
 ) apb_gpio_instance
 (
     .HCLK         (clock),
