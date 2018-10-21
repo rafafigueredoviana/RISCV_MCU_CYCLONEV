@@ -1,57 +1,117 @@
 `include "axi_bus.sv"
+`include "config.sv"
 
-module mcu_top_riscv ();
+module mcu_top_riscv (
+
+  // Global signals
+
+  input clock,
+  input reset_n,
+
+  // RISCV core control
+
+
+
+
+
+
+);
 
 /*
---------------------------------------------------
+-------------------------------------------------
+                  Signals Declaration
+-------------------------------------------------
+*/
+
+// Synchronous reset
+
+reg reset_n_sync;
+
+// RISCV Core Signals:
+
+// Instruction Memory Signals
+
+wire          instruction_request_output;
+wire          instruction_granted_input;
+wire          instruction_read_valid_input;
+wire [31:0]   instruction_address_output;
+wire [31:0]   instruction_read_data_input;
+
+// General Data Memory Signals
+
+wire          data_request_output,
+wire          data_granted_input,
+wire          data_read_valid_input,
+wire          data_write_enable_output,
+wire [ 3:0]   data_byte_enable_output,
+wire [31:0]   data_address_output,
+wire [31:0]   data_write_data_output,
+wire [31:0]   data_read_data_input,
+
+
+
+
+/*
+-------------------------------------------------
+                  Reset Register
+-------------------------------------------------
+*/
+
+always_ff @(posedge clk)
+begin
+  reset_n_sync <= reset_n;
+end
+
+/*
+-------------------------------------------------
               RISCV Core instance
 -------------------------------------------------
 */
 
 riscv_core_instance
 #(
-  .N_EXT_PERF_COUNTERS (     0       ),
-  .FPU                 ( RISCY_RV32F ),
-  .SHARED_FP           (     0       ),
-  .SHARED_FP_DIVSQRT   (     2       )
+  .N_EXT_PERF_COUNTERS   (     0       ),
+  .FPU                   ( RISCY_RV32F ),
+  .SHARED_FP             (     0       ),
+  .SHARED_FP_DIVSQRT     (     2       )
 )
   RISCV_CORE
 (
   // Clock and Reset
-  .clk_i(),
-  .rst_ni(),
+  .clk_i                 (clock       ),
+  .rst_ni                (reset_n_sync),
 
-  .clock_en_i(),    // enable clock, otherwise it is gated
-  .test_en_i(),     // enable all clock gates for testing
+  .clock_en_i            ('1),    // enable clock, otherwise it is gated
+  .test_en_i             ('0),     // enable all clock gates for testing
 
   // Core ID, Cluster ID and boot address are considered more or less static
-  .boot_addr_i(),
-  .core_id_i(),
-  .cluster_id_i(),
+  .boot_addr_i           (ROM_START_ADDR),
+  .core_id_i             (4'h0          ),
+  .cluster_id_i          (6'h0          ),
 
   // Instruction memory interface
-  .instr_req_o(),
-  .instr_gnt_i(),
-  .instr_rvalid_i(),
-  .instr_addr_o(),
-  .instr_rdata_i(),
+  .instr_req_o           (instruction_request_output    ),
+  .instr_gnt_i           (instruction_granted_input     ),
+  .instr_rvalid_i        (instruction_read_valid_input  ),
+  .instr_addr_o          (instruction_address_output    ),
+  .instr_rdata_i         (instruction_read_data_input   ),
 
   // Data memory interface
-  .data_req_o(),
-  .data_gnt_i(),
-  .data_rvalid_i(),
-  .data_we_o(),
-  .data_be_o(),
-  .data_addr_o(),
-  .data_wdata_o(),
-  .data_rdata_i(),
-  .data_err_i(),
+  .data_req_o            (data_request_output           ),
+  .data_gnt_i            (data_granted_input            ),
+  .data_rvalid_i         (data_read_valid_input         ),
+  .data_we_o             (data_write_enable_output      ),
+  .data_be_o             (data_byte_enable_output       ),
+  .data_addr_o           (data_address_output           ),
+  .data_wdata_o          (data_write_data_output        ),
+  .data_rdata_i          (data_read_data_input          ),
+  .data_err_i            (1'b0                          ),
 
   // apu-interconnect
   // handshake signals
   .apu_master_req_o      (   ),
   .apu_master_ready_o    (   ),
-  .apu_master_gnt_i      ('0 ),
+  .apu_master_gnt_i      ('1 ),
   // request channel
   .apu_master_operands_o (   ),
   .apu_master_op_o       (   ),
@@ -63,10 +123,10 @@ riscv_core_instance
   .apu_master_flags_i    ('0 ),
 
   // Interrupt inputs
-  .irq_i(),                 // level sensitive IR lines
-  .irq_id_i(),
+  .irq_i    (),                 // level sensitive IR lines
+  .irq_id_i (),
   .irq_ack_o(),
-  .irq_id_o(),
+  .irq_id_o (),
   .irq_sec_i(),
 
   .sec_lvl_o(),
@@ -87,11 +147,11 @@ riscv_core_instance
   .fetch_enable_i(),
   .core_busy_o(),
 
-  .ext_perf_counters_i
+  .ext_perf_counters_i  ()
 );
 
 /*
---------------------------------------------------
+-------------------------------------------------
                  Core 2 Axi
 -------------------------------------------------
 */
@@ -102,7 +162,7 @@ core2axi_wrap
   .AXI_ID_WIDTH     ( `AXI_ID_MASTER_WIDTH ),
   .AXI_DATA_WIDTH   ( `AXI_DATA_WIDTH      ),
   .AXI_USER_WIDTH   ( `AXI_USER_WIDTH      ),
-  .REGISTERED_GRANT ( "FALSE"             )
+  .REGISTERED_GRANT ( "FALSE"              )
 )
 core2axi_instance
 (
@@ -122,7 +182,7 @@ core2axi_instance
 );
 
 /*
---------------------------------------------------
+-------------------------------------------------
               AXI Bus Interconnect
 -------------------------------------------------
 */
@@ -152,7 +212,7 @@ axi_node_intf_wrap
 )
 
 /*
---------------------------------------------------
+-------------------------------------------------
                 AXI2APB Bridge
 -------------------------------------------------
 */
@@ -161,8 +221,8 @@ axi2apb_wrap
 #(
     .AXI_ADDR_WIDTH (32),
     .AXI_DATA_WIDTH (32),
-    .AXI_USER_WIDTH (6),
-    .AXI_ID_WIDTH   (6),
+    .AXI_USER_WIDTH ( 6),
+    .AXI_ID_WIDTH   ( 6),
     .APB_ADDR_WIDTH (32)
 ) axi2apb_wrap_instance
 (
