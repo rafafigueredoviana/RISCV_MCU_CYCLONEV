@@ -1,4 +1,6 @@
 `include "axi_bus.sv"
+`include "apb_bus.sv"
+
 `include "config.sv"
 
 module mcu_top_riscv (
@@ -69,6 +71,14 @@ AXI_BUS
 )
 masters[1:0]();
 
+// APB Bus creation
+
+APB_BUS apb_bus_master();
+
+APB_BUS apb_bus_slave_uart();
+
+APB_BUS apb_bus_slave_gpio();
+
 // AXI2MEM Signals
 
 wire          axi_memory_data_request_output;
@@ -102,8 +112,7 @@ riscv_core_instance
   .SHARED_FP             (     0       ),
   .SHARED_FP_DIVSQRT     (     2       )
 )
-  RISCV_CORE
-(
+  RISCV_CORE (
   // Clock and Reset
   .clk_i                 (clock       ),
   .rst_ni                (reset_n_sync),
@@ -191,8 +200,7 @@ core2axi_wrap
   .AXI_USER_WIDTH   ( `AXI_USER_WIDTH       ),
   .REGISTERED_GRANT ( "FALSE"               )
 )
-core2axi_instance
-(
+core2axi_instance (
   .clk_i         ( clk                      ),
   .rst_ni        ( reset_n_sync             ),
 
@@ -222,13 +230,14 @@ axi_node_intf_wrap
   .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
   .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
   .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
-) axi_bus_interconnect (
+)
+  axi_bus_interconnect (
 
   .clk          (clk),
   .rst_n        (reset_n_sync),
   .test_en_i    ('0),
 
-  .slave        (masters), //CORE2AXI -> AXIBUS
+  .slave        (masters[0]), //CORE2AXI -> AXIBUS
 
   .master       (slaves), // CORE2AXI -> AXIBUS -> AXIPERIPHERALS
 
@@ -252,8 +261,7 @@ axi_mem_if_SP_wrap
   .AXI_USER_WIDTH  ( AXI_USER_WIDTH     ),
   .MEM_ADDR_WIDTH  ( DATA_ADDR_WIDTH    )
 )
-data_mem_axi_if
-(
+data_mem_axi_if (
   .clk         ( clk                                 ),
   .rst_n       ( reset_n_sync                        ),
   .test_en_i   ( '0                                  ),
@@ -279,7 +287,8 @@ sp_ram_wrap
     .RAM_SIZE   (DATA_RAM_SIZE                      ), // in bytes
     .ADDR_WIDTH ($clog2(RAM_SIZE)                   ),
     .DATA_WIDTH (32                                 )
-  )(
+  )
+  sp_ram_wrap_instance  (
     // Clock and Reset
     .clk        (clock                              ),
     .rstn_i     (reset_n_sync                       ),
@@ -301,20 +310,20 @@ sp_ram_wrap
 
 axi2apb_wrap
 #(
-    .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH),
-    .AXI_DATA_WIDTH (AXI_DATA_WIDTH),
-    .AXI_USER_WIDTH ( AXI_USER_WIDTH),
+    .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH     ),
+    .AXI_DATA_WIDTH (AXI_DATA_WIDTH     ),
+    .AXI_USER_WIDTH ( AXI_USER_WIDTH    ),
     .AXI_ID_WIDTH   ( AXI_ID_SLAVE_WIDTH),
-    .APB_ADDR_WIDTH (APB_ADDR_WIDTH)
-) axi2apb_wrap_instance
-(
-    .clk_i        (clock),
-    .rst_ni       (reset_n_sync),
-    .test_en_i    (),
+    .APB_ADDR_WIDTH (APB_ADDR_WIDTH     )
+)
+  axi2apb_wrap_instance (
+    .clk_i        (clock                ),
+    .rst_ni       (reset_n_sync         ),
+    .test_en_i    (                     ),
 
-    .axi_slave    (),
+    .axi_slave    (slaves[1]            ), // CORE2AXI -> AXIBUS -> AXI2APB
 
-    .apb_master   ()
+    .apb_master   (apb_bus_master       ) // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS
 
 );
 
@@ -328,15 +337,15 @@ periph_bus_wrap
   #(
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH),
     .APB_DATA_WIDTH (APB_DATA_WIDTH)
-    ) periph_bus_wrap_instance
-   (
+    )
+    periph_bus_wrap_instance (
     .clk_i            (clock),
     .rst_ni           (reset_n_sync),
 
-    .apb_slave        (),
+    .apb_slave        (apb_bus_master), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> APBPERIPHERALS
 
-    .uart_master      (),
-    .gpio_master      (),
+    .uart_master      (apb_bus_slave_uart), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> UART
+    .gpio_master      (apb_bus_slave_gpio), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> GPIO
     .spi_master       (),
     .timer_master     (),
     .event_unit_master(),
@@ -357,25 +366,25 @@ periph_bus_wrap
 apb_uart_sv
 #(
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH)  //APB slaves are 4KB by default - 12 bits
-) apb_uart_sv_instance
-(
-    .CLK        (clock)
-    .RSTN       (reset_n_sync),
+)
+  apb_uart_sv_instance (
+    .CLK        (clock                        )
+    .RSTN       (reset_n_sync                 ),
     /* verilator lint_off UNUSED */
-    .PADDR      (),
+    .PADDR      (apb_bus_slave_uart.paddr[4:2]),
     /* lint_on */
-    .PWDATA     (),
-    .PWRITE     (),
-    .PSEL       (),
-    .PENABLE    (),
-    .PRDATA     (),
-    .PREADY     (),
-    .PSLVERR    (),
+    .PWDATA     (apb_bus_slave_uart.pwdata    ),
+    .PWRITE     (apb_bus_slave_uart.pwrite    ),
+    .PSEL       (apb_bus_slave_uart.psel      ),
+    .PENABLE    (apb_bus_slave_uart.penable   ),
+    .PRDATA     (apb_bus_slave_uart.prdata    ),
+    .PREADY     (apb_bus_slave_uart.pready    ),
+    .PSLVERR    (apb_bus_slave_uart.pslverr   ),
 
-    .rx_i       (),     // Receiver input
-    .tx_o       (),     // Transmitter output
+    .rx_i       (                             ),     // Receiver input
+    .tx_o       (                             ),     // Transmitter output
 
-    .event_o    ()      // interrupt/event output
+    .event_o    (                             )      // interrupt/event output
 );
 
 /*
@@ -387,26 +396,26 @@ apb_uart_sv
 apb_gpio
 #(
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH)  //APB slaves are 4KB by default - 12 bits
-) apb_gpio_instance
-(
-    .HCLK         (clock),
-    .HRESETn      (reset_n_sync),
-    .PADDR        (),
-    .PWDATA       (),
-    .PWRITE       (),
-    .PSEL         (),
-    .PENABLE      (),
-    .PRDATA       (),
-    .PREADY       (),
-    .PSLVERR      (),
+)
+  apb_gpio_instance (
+    .HCLK         (clock                          ),
+    .HRESETn      (reset_n_sync                   ),
+    .PADDR        (apb_bus_slave_gpio.paddr[11:0] ),
+    .PWDATA       (apb_bus_slave_gpio.pwdata      ),
+    .PWRITE       (apb_bus_slave_gpio.pwrite      ),
+    .PSEL         (apb_bus_slave_gpio.psel        ),
+    .PENABLE      (apb_bus_slave_gpio.penable     ),
+    .PRDATA       (apb_bus_slave_gpio.prdata      ),
+    .PREADY       (apb_bus_slave_gpio.pready      ),
+    .PSLVERR      (apb_bus_slave_gpio.psverr      ),
 
-    .gpio_in      (),
-    .gpio_in_sync (),
-    .gpio_out     (),
-    .gpio_dir     (),
-    .gpio_padcfg  (),
-    .power_event  (),
-    .interrupt    ()
+    .gpio_in      (                               ),
+    .gpio_in_sync (                               ),
+    .gpio_out     (                               ),
+    .gpio_dir     (                               ),
+    .gpio_padcfg  (                               ),
+    .power_event  (                               ),
+    .interrupt    (                               )
 );
 
 endmodule;
