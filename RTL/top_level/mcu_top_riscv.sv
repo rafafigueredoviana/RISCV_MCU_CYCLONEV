@@ -167,7 +167,7 @@ core2axi_wrap
 core2axi_instance
 (
   .clk_i         ( clk                      ),
-  .rst_ni        ( rst_n                    ),
+  .rst_ni        ( reset_n_sync             ),
 
   .data_req_i    ( data_request_output      ),
   .data_gnt_o    ( data_granted_input       ),
@@ -177,7 +177,7 @@ core2axi_instance
   .data_addr_i   ( data_address_output      ),
   .data_wdata_i  ( data_write_data_output   ),
   .data_rdata_o  ( data_read_data_input     ),
-  
+
   .master        ( core_master_int          )
 );
 
@@ -189,16 +189,16 @@ core2axi_instance
 
 axi_node_intf_wrap
 #(
-  .NB_MASTER      ( 2                    ),	// AXI Masters: RISCV core
-  .NB_SLAVE       ( 2                    ),	// AXI Slaves:  Data Memory, UART
+  .NB_MASTER      ( 1                    ),	// AXI Masters: RISCV core
+  .NB_SLAVE       ( 2                    ),	// AXI Slaves:  Data Memory, AXI2APB bridge
   .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH      ),
   .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
   .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
   .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
 ) axi_bus_interconnect (
 
-  .clk          (),
-  .rst_n        (),
+  .clk          (clk),
+  .rst_n        (reset_n_sync),
   .test_en_i    (),
 
   .slave        (),
@@ -210,6 +210,24 @@ axi_node_intf_wrap
   .end_addr_i   ()
 
 )
+
+sp_ram_wrap
+  #(
+    .RAM_SIZE   (DATA_RAM_SIZE    ),              // in bytes
+    .ADDR_WIDTH ($clog2(RAM_SIZE) ),
+    .DATA_WIDTH (32               )
+  )(
+    // Clock and Reset
+    .clk        (clock),
+    .rstn_i     (reset_n_sync),
+    .en_i       (),
+    .addr_i     (),
+    .wdata_i    (),
+    .rdata_o    (),
+    .we_i       (),
+    .be_i       (),
+    .bypass_en_i()
+  );
 
 /*
 -------------------------------------------------
@@ -226,8 +244,8 @@ axi2apb_wrap
     .APB_ADDR_WIDTH (32)
 ) axi2apb_wrap_instance
 (
-    .clk_i        (),
-    .rst_ni       (),
+    .clk_i        (clock),
+    .rst_ni       (reset_n_sync),
     .test_en_i    (),
 
     .axi_slave    (),
@@ -248,8 +266,8 @@ periph_bus_wrap
     .APB_DATA_WIDTH (32)
     ) periph_bus_wrap_instance
    (
-    .clk_i            (),
-    .rst_ni           (),
+    .clk_i            (clock),
+    .rst_ni           (reset_n_sync),
 
     .apb_slave        (),
 
@@ -277,8 +295,8 @@ apb_uart_sv
     .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
 ) apb_uart_sv_instance
 (
-    .CLK        ()
-    .RSTN       (),
+    .CLK        (clock)
+    .RSTN       (reset_n_sync),
     /* verilator lint_off UNUSED */
     .PADDR      (),
     /* lint_on */
@@ -307,8 +325,8 @@ apb_gpio
     .APB_ADDR_WIDTH (12)  //APB slaves are 4KB by default
 ) apb_gpio_instance
 (
-    .HCLK         (),
-    .HRESETn      (),
+    .HCLK         (clock),
+    .HRESETn      (reset_n_sync),
     .PADDR        (),
     .PWDATA       (),
     .PWRITE       (),

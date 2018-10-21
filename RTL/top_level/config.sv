@@ -10,22 +10,39 @@
 
 `ifndef CONFIG_SV
 `define CONFIG_SV
-`define RISCV
-// always define ASIC when we do a synthesis run
-`ifndef PULP_FPGA_EMUL
-`ifdef SYNTHESIS
-`define ASIC
-`endif
-`endif
+  `define RISCV
+  `define SIMULATION
+  // `define PULP_FPGA_EMUL
+  // always define ASIC when we do a synthesis run
+  `ifndef SIMULATION
+    `ifndef PULP_FPGA_EMUL
+      `ifdef SYNTHESIS
+        `define ASIC
+      `endif
+    `endif
+  `endif
+  // data and instruction RAM address and word width
+  `define ROM_ADDR_WIDTH      12
+  `define ROM_START_ADDR      32'h8000
 
-// data and instruction RAM address and word width
-`define ROM_ADDR_WIDTH      12
-`define ROM_START_ADDR      32'h8000
+  // General defines
 
-// Simulation only stuff
-`ifndef SYNTHESIS
-//`define DATA_STALL_RANDOM
-//`define INSTR_STALL_RANDOM
-`endif
+  `define AXI_ADDR_WIDTH       = 32,
+  `define AXI_DATA_WIDTH       = 64,
+  `define AXI_ID_MASTER_WIDTH  = 10,
+  `define AXI_ID_SLAVE_WIDTH   = 10,
+  `define AXI_USER_WIDTH       = 0,
+  `define DATA_RAM_SIZE        = 32768, // in bytes
+  `define INSTR_RAM_SIZE       = 32768, // in bytes
+  `define USE_ZERO_RISCY       = 0,
+  `define RISCY_RV32F          = 1,
+  `define ZERO_RV32M           = 0,
+  `define ZERO_RV32E           = 0
+
+  // Simulation only stuff
+  `ifndef SYNTHESIS
+  //`define DATA_STALL_RANDOM
+  //`define INSTR_STALL_RANDOM
+  `endif
 
 `endif
