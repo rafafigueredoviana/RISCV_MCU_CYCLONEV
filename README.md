@@ -24,12 +24,12 @@ Implement a fully functional system for basic aplications, which will include:
 # Plataform
 
 A DE10nano FPGA board from Altera will be the target device for the system.
-* Syntehsis tool: Quartus II v18.1
+* Syntehsis tool: Quartus II v18.1;
 * Simulation tool: Modelsim 10.5b.
 
 # Folder strucure:
 
 * Doc - Relevant documentation and recomended sources for project design;
-* Project - Main project folder - it will contain the Quartus II 18.1 and Eclipse project files
-* RTL - Hardware description source files - it will include all IPs and self-made designs used in the project
-* Tesbench - Main testbenches files and definitions
+* Project - Main project folder - it will contain the Quartus II 18.1 and Eclipse project files;
+* RTL - Hardware description source files - it will include all IPs and self-made designs used in the project;
+* Tesbench - Main testbenches files and definitions.
