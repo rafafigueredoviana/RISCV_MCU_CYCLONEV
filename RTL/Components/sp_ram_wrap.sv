@@ -30,7 +30,7 @@ module sp_ram_wrap
 
 `ifdef PULP_FPGA_EMUL
 
-  wire enable_ram;
+  wire write_enable_ram;
 
   wire [31:0] data_out;
 
