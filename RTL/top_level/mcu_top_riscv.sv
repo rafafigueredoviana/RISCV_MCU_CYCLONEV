@@ -39,14 +39,14 @@ wire [31:0]   instruction_read_data_input;
 
 // General Data Memory Signals
 
-wire          data_request_output,
-wire          data_granted_input,
-wire          data_read_valid_input,
-wire          data_write_enable_output,
-wire [ 3:0]   data_byte_enable_output,
-wire [31:0]   data_address_output,
-wire [31:0]   data_write_data_output,
-wire [31:0]   data_read_data_input,
+wire          data_request_output;
+wire          data_granted_input;
+wire          data_read_valid_input;
+wire          data_write_enable_output;
+wire [ 3:0]   data_byte_enable_output;
+wire [31:0]   data_address_output;
+wire [31:0]   data_write_data_output;
+wire [31:0]   data_read_data_input;
 
 
 
@@ -158,27 +158,27 @@ riscv_core_instance
 
 core2axi_wrap
 #(
-  .AXI_ADDR_WIDTH   ( `AXI_ADDR_WIDTH      ),
-  .AXI_ID_WIDTH     ( `AXI_ID_MASTER_WIDTH ),
-  .AXI_DATA_WIDTH   ( `AXI_DATA_WIDTH      ),
-  .AXI_USER_WIDTH   ( `AXI_USER_WIDTH      ),
-  .REGISTERED_GRANT ( "FALSE"              )
+  .AXI_ADDR_WIDTH   ( `AXI_ADDR_WIDTH       ),
+  .AXI_ID_WIDTH     ( `AXI_ID_MASTER_WIDTH  ),
+  .AXI_DATA_WIDTH   ( `AXI_DATA_WIDTH       ),
+  .AXI_USER_WIDTH   ( `AXI_USER_WIDTH       ),
+  .REGISTERED_GRANT ( "FALSE"               )
 )
 core2axi_instance
 (
-  .clk_i         ( clk             ),
-  .rst_ni        ( rst_n           ),
+  .clk_i         ( clk                      ),
+  .rst_ni        ( rst_n                    ),
 
-  .data_req_i    ( core_axi_req    ),
-  .data_gnt_o    ( core_axi_gnt    ),
-  .data_rvalid_o ( core_axi_rvalid ),
-  .data_addr_i   ( core_axi_addr   ),
-  .data_we_i     ( core_axi_we     ),
-  .data_be_i     ( core_axi_be     ),
-  .data_rdata_o  ( core_axi_rdata  ),
-  .data_wdata_i  ( core_axi_wdata  ),
-
-  .master        ( core_master_int )
+  .data_req_i    ( data_request_output      ),
+  .data_gnt_o    ( data_granted_input       ),
+  .data_rvalid_o ( data_read_valid_input    ),
+  .data_we_i     ( data_write_enable_output ),
+  .data_be_i     ( data_byte_enable_output  ),
+  .data_addr_i   ( data_address_output      ),
+  .data_wdata_i  ( data_write_data_output   ),
+  .data_rdata_o  ( data_read_data_input     ),
+  
+  .master        ( core_master_int          )
 );
 
 /*
