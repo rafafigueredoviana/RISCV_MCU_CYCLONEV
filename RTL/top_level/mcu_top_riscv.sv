@@ -1,3 +1,5 @@
+
+
 `include "axi_bus.sv"
 `include "apb_bus.sv"
 
@@ -7,15 +9,23 @@ module mcu_top_riscv (
 
   // Global signals
 
-  input clock,
-  input reset_n,
+  input     clock,
+  input     reset_n,
 
   // RISCV core control
 
+  input     fetch_enable_input,
 
+  // UART signals
 
+  input     uart_rx_input,
+  output    uart_tx_output
 
+  // GPIO signals
 
+  input [31:0] gpio_input
+  input [31:0] gpio_output
+  input [31:0] gpio_direction
 
 );
 
@@ -38,6 +48,15 @@ wire          instruction_granted_input;
 wire          instruction_read_valid_input;
 wire [31:0]   instruction_address_output;
 wire [31:0]   instruction_read_data_input;
+
+// AXI2MEM Signals
+
+wire          axi_memory_data_request_output;
+wire          axi_memory_data_write_enable_output;
+wire [ 3:0]   axi_memory_data_byte_enable_output;
+wire [31:0]   axi_memory_data_address_output;
+wire [31:0]   axi_memory_data_write_data_output;
+wire [31:0]   axi_memory_data_read_data_input;
 
 // General Data Memory Signals
 
@@ -79,14 +98,14 @@ APB_BUS apb_bus_slave_uart();
 
 APB_BUS apb_bus_slave_gpio();
 
-// AXI2MEM Signals
+APB_BUS apb_bus_slave_event_unit();
 
-wire          axi_memory_data_request_output;
-wire          axi_memory_data_write_enable_output;
-wire [ 3:0]   axi_memory_data_byte_enable_output;
-wire [31:0]   axi_memory_data_address_output;
-wire [31:0]   axi_memory_data_write_data_output;
-wire [31:0]   axi_memory_data_read_data_input;
+// Interrupts signals
+
+wire apb_uart_event;
+
+wire apb_gpio_event;
+
 
 /*
 -------------------------------------------------
@@ -105,14 +124,24 @@ end
 -------------------------------------------------
 */
 
-riscv_core_instance
+logic [4:0] irq_id;
+always_comb begin
+  irq_id = '0;
+  for (int i = 0; i < 32; i+=1) begin
+    if(irq_i[i]) begin
+      irq_id = i[4:0];
+    end
+  end
+end
+
+riscv_core
 #(
   .N_EXT_PERF_COUNTERS   (     0       ),
   .FPU                   ( RISCY_RV32F ),
   .SHARED_FP             (     0       ),
   .SHARED_FP_DIVSQRT     (     2       )
 )
-  RISCV_CORE (
+  riscv_core_instance (
   // Clock and Reset
   .clk_i                 (clock       ),
   .rst_ni                (reset_n_sync),
@@ -159,11 +188,11 @@ riscv_core_instance
   .apu_master_flags_i    ('0 ),
 
   // Interrupt inputs
-  .irq_i    (),                 // level sensitive IR lines
-  .irq_id_i (),
-  .irq_ack_o(),
-  .irq_id_o (),
-  .irq_sec_i(),
+  .irq_i    (|interrupt_request_output  ),                 // level sensitive IR lines
+  .irq_id_i (irq_id                     ),
+  .irq_ack_o(                           ),
+  .irq_id_o (                           ),
+  .irq_sec_i('0                         ),
 
   .sec_lvl_o(),
 
@@ -180,8 +209,8 @@ riscv_core_instance
   .debug_resume_i       ('0 ),
 
   // CPU Control Signals
-  .fetch_enable_i(),
-  .core_busy_o(),
+  .fetch_enable_i       (fetch_enable_output),
+  .core_busy_o          (                   ),
 
   .ext_perf_counters_i  ()
 );
@@ -249,7 +278,7 @@ core2axi_instance (
   .data_wdata_i  ( data_write_data_output   ),
   .data_rdata_o  ( data_read_data_input     ),
 
-  .master        ( masters[0]               )
+  .master        ( masters[0]               ) // RISCV_CORE -> CORE2AXI
 );
 
 /*
@@ -273,9 +302,9 @@ axi_node_intf_wrap
   .rst_n        (reset_n_sync),
   .test_en_i    ('0),
 
-  .slave        (masters[0]), //CORE2AXI -> AXIBUS
+  .slave        (masters[0]), // RISCV_CORE -> CORE2AXI -> AXIBUS
 
-  .master       (slaves), // CORE2AXI -> AXIBUS -> AXIPERIPHERALS
+  .master       (slaves),     // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIPERIPHERALS
 
   // Memory map
   .start_addr_i (),
@@ -297,7 +326,7 @@ axi_mem_if_SP_wrap
   .AXI_USER_WIDTH  ( AXI_USER_WIDTH     ),
   .MEM_ADDR_WIDTH  ( DATA_ADDR_WIDTH    )
 )
-data_mem_axi_if (
+data_mem_axi_interface (
   .clk         ( clk                                 ),
   .rst_n       ( reset_n_sync                        ),
   .test_en_i   ( '0                                  ),
@@ -309,7 +338,7 @@ data_mem_axi_if (
   .mem_wdata_o ( axi_memory_data_write_data_output   ),
   .mem_rdata_i ( axi_memory_data_read_data_input     ),
 
-  .slave       ( slaves[0]                           )  // CORE2AXI -> AXIBUS -> AXIMEM
+  .slave       ( slaves[0]                           )  // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIMEM
 );
 
 /*
@@ -324,7 +353,7 @@ sp_ram_wrap
     .ADDR_WIDTH ($clog2(RAM_SIZE)                   ),
     .DATA_WIDTH (32                                 )
   )
-  sp_ram_wrap_instance  (
+  single_port_ram_wrap_instance  (
     // Clock and Reset
     .clk        (clock                              ),
     .rstn_i     (reset_n_sync                       ),
@@ -352,14 +381,14 @@ axi2apb_wrap
     .AXI_ID_WIDTH   ( AXI_ID_SLAVE_WIDTH),
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH     )
 )
-  axi2apb_wrap_instance (
+  axi2apb_bridge_instance (
     .clk_i        (clock                ),
     .rst_ni       (reset_n_sync         ),
     .test_en_i    (                     ),
 
-    .axi_slave    (slaves[1]            ), // CORE2AXI -> AXIBUS -> AXI2APB
+    .axi_slave    (slaves[1]            ), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB
 
-    .apb_master   (apb_bus_master       ) // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS
+    .apb_master   (apb_bus_master       ) // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS
 
 );
 
@@ -374,17 +403,17 @@ periph_bus_wrap
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH),
     .APB_DATA_WIDTH (APB_DATA_WIDTH)
     )
-    periph_bus_wrap_instance (
+    periph_bus_interconnect_instance (
     .clk_i            (clock),
     .rst_ni           (reset_n_sync),
 
-    .apb_slave        (apb_bus_master), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> APBPERIPHERALS
+    .apb_slave        (apb_bus_master), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> APBBUSPERIPHERALS
 
-    .uart_master      (apb_bus_slave_uart), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> UART
-    .gpio_master      (apb_bus_slave_gpio), // CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> GPIO
+    .uart_master      (apb_bus_slave_uart), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> UART
+    .gpio_master      (apb_bus_slave_gpio), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> GPIO
     .spi_master       (),
     .timer_master     (),
-    .event_unit_master(),
+    .event_unit_master(apb_bus_slave_event_unit), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> EVENT_UNIT
     .i2c_master       (),
     .fll_master       (),
     .soc_ctrl_master  (),
@@ -417,10 +446,10 @@ apb_uart_sv
     .PREADY     (apb_bus_slave_uart.pready    ),
     .PSLVERR    (apb_bus_slave_uart.pslverr   ),
 
-    .rx_i       (                             ),     // Receiver input
-    .tx_o       (                             ),     // Transmitter output
+    .rx_i       ( uart_rx_input                             ),     // Receiver input
+    .tx_o       ( uart_tx_output                            ),     // Transmitter output
 
-    .event_o    (                             )      // interrupt/event output
+    .event_o    (apb_uart_event               )      // interrupt/event output
 );
 
 /*
@@ -445,13 +474,42 @@ apb_gpio
     .PREADY       (apb_bus_slave_gpio.pready      ),
     .PSLVERR      (apb_bus_slave_gpio.psverr      ),
 
-    .gpio_in      (                               ),
-    .gpio_in_sync (                               ),
-    .gpio_out     (                               ),
-    .gpio_dir     (                               ),
-    .gpio_padcfg  (                               ),
-    .power_event  (                               ),
-    .interrupt    (                               )
+    .gpio_in      ( gpio_input                    ),
+    .gpio_out     ( gpio_output                   ),
+    .gpio_dir     ( gpio_direction                ),
+
+    .interrupt    (apb_gpio_event                 )
+);
+
+
+/*
+-------------------------------------------------
+                    APB Event Unit
+-------------------------------------------------
+*/
+apb_event_unit
+apb_event_unit_instance (
+  .clk_i            ( clock        ),
+  .HCLK             ( clock        ),
+  .HRESETn          ( reset_n_sync ),
+
+  .PADDR            ( apb_bus_slave_event_unit.paddr[11:0]),
+  .PWDATA           ( apb_bus_slave_event_unit.pwdata     ),
+  .PWRITE           ( apb_bus_slave_event_unit.pwrite     ),
+  .PSEL             ( apb_bus_slave_event_unit.psel       ),
+  .PENABLE          ( apb_bus_slave_event_unit.penable    ),
+  .PRDATA           ( apb_bus_slave_event_unit.prdata     ),
+  .PREADY           ( apb_bus_slave_event_unit.pready     ),
+  .PSLVERR          ( apb_bus_slave_event_unit.pslverr    ),
+
+  .irq_i            ( {6'b0, apb_gpio_event, apb_uart_event, 24'b0} ),
+  .event_i          ( {6'b0, apb_gpio_event, apb_uart_event, 24'b0} ),
+  .irq_o            ( interrupt_request_output                      ),
+
+  .fetch_enable_i   ( fetch_enable_input      ),
+  .fetch_enable_o   ( fetch_enable_output     ),
+  .clk_gate_core_o  ( clk_gate_core_o         ),
+  .core_busy_i      ( core_busy_i             )
 );
 
 endmodule;
