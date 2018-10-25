@@ -1,4 +1,4 @@
-# Elaborate project
+# Elaborate the project
 
 To elaborate the project, first open the Quartus folder and open the RISCV_MCU.qpf. Then go to
 ``
