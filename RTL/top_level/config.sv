@@ -11,7 +11,7 @@
 `ifndef CONFIG_SV
 `define CONFIG_SV
   `define RISCV
-  `define SIMULATION
+  //`define SIMULATION
   // `define PULP_FPGA_EMUL
   // always define ASIC when we do a synthesis run
   `ifndef SIMULATION
@@ -46,5 +46,20 @@
   //`define DATA_STALL_RANDOM
   //`define INSTR_STALL_RANDOM
   `endif
+
+  // File: riscv_alu.sv
+  // This was removed from RISCV parameter to allow Quartus II `ifdef macro interpretation. Had to rewrite some portions of the RISCV core design to allow Quartus software to synthesize it.
+  `define FPU            = 1
+  //`define SHARED_INT_DIV = 0
+
+  // File: riscv_cs_registers.sv
+
+  //`define PULP_SECURE  = 0
+
+  // //`define APU   = 0
+
+  // File: riscv_int_controller.sv
+
+  //`define PULP_SECURE  = 0
 
 `endif

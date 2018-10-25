@@ -19,12 +19,12 @@ module mcu_top_riscv (
   // UART signals
 
   input     uart_rx_input,
-  output    uart_tx_output
+  output    uart_tx_output,
 
   // GPIO signals
 
-  input [31:0] gpio_input
-  input [31:0] gpio_output
+  input [31:0] gpio_input,
+  input [31:0] gpio_output,
   input [31:0] gpio_direction
 
 );
