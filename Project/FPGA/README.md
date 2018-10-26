@@ -12,9 +12,9 @@ To elaborate the project, first open the Quartus folder and open the RISCV_MCU.q
 ``
     Assignment -> Settings -> Files
 ``
-Now, run "Analysis and Syntheis" at
+Now, run "Analysis and Elaboration" at
 ``
-Processing -> Start -> Start Analysis and Syntheis
+Processing -> Start -> Start Analysis and Elaboration
 ``
  or via the GUI menu.
 
