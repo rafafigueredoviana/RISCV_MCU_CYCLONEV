@@ -8,7 +8,7 @@ if {[file isdirectory rtl_wrap] == 0} {
 source ../source_files.tcl
 
 
-foreach design [concat $RISCV_SOURCE_MODIFIED ] {
+foreach design [concat $PULPINO_SOURCE $APB_SOURCE $MODIFIED_SOURCES ] {
     puts "Source files: $design"
     # Create the file set
     set design_files_verilog [glob -directory  $design "*.*v*"]
@@ -30,6 +30,13 @@ cd rtl_wrap
 
   #file delete -force sleep_unit.sv
 
+file delete -force apb_uart.sv
+
+file delete -force random_stalls.sv
+
+file delete -force core_region.sv
+
+file delete -force pulpino_top.sv
 
 foreach system_verilog_file [glob "*.sv"] {
   #puts "Verilog file name: $verilog_file"
