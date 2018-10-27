@@ -8,13 +8,13 @@ module APB_ASSIGN_BUS (
 
 );
 
-assign apb_slave.paddr    = apb_master.paddr;
-assign apb_slave.pwdata   = apb_master.pwdata;
-assign apb_slave.pwrite   = apb_master.pwrite;
-assign apb_slave.psel     = apb_master.psel;
-assign apb_slave.penable  = apb_master.penable;
-assign apb_master.prdata   = apb_slave.prdata;
-assign apb_master.pready   = apb_slave.pready;
-assign apb_master.pslverr  = apb_slave.pslverr;
+assign apb_master.paddr    = apb_slave.paddr;
+assign apb_master.pwdata   = apb_slave.pwdata;
+assign apb_master.pwrite   = apb_slave.pwrite;
+assign apb_master.psel     = apb_slave.psel;
+assign apb_master.penable  = apb_slave.penable;
+assign apb_slave.prdata   = apb_master.prdata;
+assign apb_slave.pready   = apb_master.pready;
+assign apb_slave.pslverr  = apb_master.pslverr;
 
 endmodule

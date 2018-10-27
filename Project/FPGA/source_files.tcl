@@ -1,16 +1,19 @@
-set RISCV_CORE_MODIFIED "../../../RTL/Modified_source/riscv"
+
 set RISCV_CORE          "../../../RTL/pulpino/ips/riscv"
 
 set APB_COMPONENTS      "../../../RTL/pulpino/ips/apb"
-set APB_COMPONENTS_MODIFIED      "../../../RTL/Modified_source/apb"
 
 set AXI_COMPONENTS      "../../../RTL/pulpino/ips/axi"
-set AXI_COMPONENTS_MODIFIED      "../../../RTL/Modified_source/axi"
 
 set PULPINO_FILES       "../../../RTL/pulpino/rtl"
-set PULPINO_FILES_MODIFIED       "../../../RTL/Modified_source/pulpino"
 
-set MCU_FILES           "../../../RTL"
+set PULPINO_IPS_FILES       "../../../RTL/pulpino/ips"
+
+set MCU_FILES           "../../../RTL/top_level"
+
+set PULPINO_FILES_MODIFIED       "../../../RTL/Modified_source"
+
+set RISCV_CORE_MODIFIED "../../../RTL/Modified_source/riscv"
 
 set RISCV_SOURCE_MODIFIED "\
   $RISCV_CORE_MODIFIED \
@@ -39,15 +42,26 @@ set PULPINO_SOURCE "\
   $PULPINO_FILES/includes \
   $PULPINO_FILES/components \
   "
-set RISCV_MCU_SOURCE "\
- $MCU_FILES/Components \
- $MCU_FILES/top_level \
+set PULPINO_IPS_SOURCE "\
+  $PULPINO_IPS_FILES/fpu/hdl/fpu_v0.1 \
+  $PULPINO_IPS_FILES/fpu/hdl/fpu_utils \
+  $PULPINO_IPS_FILES/fpu/hdl/fpu_div_sqrt_tp_nlp \
+
   "
 
 
+
+set ORIGINAL_SOURCES "\
+ $APB_SOURCE \
+ $AXI_SOURCE \
+ $PULPINO_SOURCE \
+ $PULPINO_IPS_SOURCE \
+  "
+
 set MODIFIED_SOURCES "\
   $RISCV_SOURCE_MODIFIED \
-  $APB_COMPONENTS_MODIFIED \
-  $AXI_COMPONENTS_MODIFIED \
-  $PULPINO_FILES_MODIFIED \
+  $PULPINO_FILES_MODIFIED/apb \
+  $PULPINO_FILES_MODIFIED/axi \
+  $PULPINO_FILES_MODIFIED/pulpino \
+  $PULPINO_FILES_MODIFIED/fpu\
   "

@@ -8,11 +8,15 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+
 `ifndef CONFIG_SV
+
+package RISCV_MCU_CONFIG;
+
 `define CONFIG_SV
   `define RISCV
   //`define SIMULATION
-  // `define PULP_FPGA_EMUL
+   //`define PULP_FPGA_EMUL
   // always define ASIC when we do a synthesis run
   `ifndef SIMULATION
     `ifndef PULP_FPGA_EMUL
@@ -22,24 +26,27 @@
     `endif
   `endif
   // data and instruction RAM address and word width
-  `define ROM_ADDR_WIDTH      12
-  `define ROM_START_ADDR      32'h8000
+
+
+  parameter ROM_ADDR_WIDTH      = 12;
+  parameter ROM_START_ADDR      = 32'h8000;
 
   // General defines
 
-  `define AXI_ADDR_WIDTH       = 32,
-  `define AXI_DATA_WIDTH       = 32,
-  `define AXI_ID_MASTER_WIDTH  = 2,
-  `define AXI_ID_SLAVE_WIDTH   = 2,
-  `define AXI_USER_WIDTH       = 0,
-  `define APB_ADDR_WIDTH       = 32,
-  `define APB_DATA_WIDTH       = 32,
-  `define DATA_RAM_SIZE        = 32768, // in bytes
-  `define INSTR_RAM_SIZE       = 32768, // in bytes
-  `define USE_ZERO_RISCY       = 0,
-  `define RISCY_RV32F          = 1,
-  `define ZERO_RV32M           = 0,
-  `define ZERO_RV32E           = 0
+  parameter AXI_ADDR_WIDTH       = 32;
+  parameter AXI_DATA_WIDTH       = 32;
+  parameter DATA_ADDR_WIDTH      = 32;
+  parameter AXI_ID_MASTER_WIDTH  = 2;
+  parameter AXI_ID_SLAVE_WIDTH   = 4;
+  parameter AXI_USER_WIDTH       = 1;
+  parameter APB_ADDR_WIDTH       = 32;
+  parameter APB_DATA_WIDTH       = 32;
+  parameter DATA_RAM_SIZE        = 32768; // in bytes
+  parameter INSTR_RAM_SIZE       = 32768; // in bytes
+  parameter USE_ZERO_RISCY       = 0;
+  parameter RISCY_RV32F          = 1;
+  parameter ZERO_RV32M           = 0;
+  parameter ZERO_RV32E           = 0;
 
   // Simulation only stuff
   `ifndef SYNTHESIS
@@ -62,4 +69,5 @@
 
   //`define PULP_SECURE  = 0
 
+endpackage
 `endif

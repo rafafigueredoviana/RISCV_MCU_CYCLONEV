@@ -355,7 +355,8 @@ parameter DBG_SETS_EBRK   = 1;
 parameter DBG_SETS_SSTE   = 0;
 
 parameter DBG_CAUSE_HALT   = 6'h1F;
-
+`ifndef _FPU_PVT_CMD_
+`define _FPU_PVT_CMD_
 // private FPU
 parameter C_CMD               = 4;
 parameter C_FPU_ADD_CMD       = 4'h0;
@@ -370,14 +371,17 @@ parameter C_FPU_FMADD_CMD     = 4'h8;
 parameter C_FPU_FMSUB_CMD     = 4'h9;
 parameter C_FPU_FNMADD_CMD    = 4'hA;
 parameter C_FPU_FNMSUB_CMD    = 4'hB;
-
-parameter C_FFLAG             = 5;
 parameter C_RM                = 3;
 parameter C_RM_NEAREST        = 3'h0;
 parameter C_RM_TRUNC          = 3'h1;
 parameter C_RM_PLUSINF        = 3'h3;
 parameter C_RM_MINUSINF       = 3'h2;
 parameter C_PC                = 5;
+parameter C_FFLAG             = 5;
+`endif
+
+
+
 
 
 // Additional defines due to Quartus II extreme incompatibility with simple systemverilog macros:

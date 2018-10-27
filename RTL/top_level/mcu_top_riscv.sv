@@ -3,7 +3,7 @@
 `include "axi_bus.sv"
 `include "apb_bus.sv"
 
-`include "config.sv"
+import RISCV_MCU_CONFIG::*;
 
 module mcu_top_riscv (
 
@@ -24,10 +24,14 @@ module mcu_top_riscv (
   // GPIO signals
 
   input [31:0] gpio_input,
-  input [31:0] gpio_output,
-  input [31:0] gpio_direction
+  output [31:0] gpio_output,
+  output [31:0] gpio_direction
 
 );
+
+localparam INSTR_ADDR_WIDTH = $clog2(INSTR_RAM_SIZE)+1; // to make space for the boot rom
+localparam DATA_ADDR_WIDTH  = $clog2(DATA_RAM_SIZE);    // size of data address bus
+localparam AXI_B_WIDTH      = $clog2(AXI_DATA_WIDTH/8); // AXI "Byte" width
 
 /*
 -------------------------------------------------
@@ -54,7 +58,7 @@ wire [31:0]   instruction_read_data_input;
 wire          axi_memory_data_request_output;
 wire          axi_memory_data_write_enable_output;
 wire [ 3:0]   axi_memory_data_byte_enable_output;
-wire [31:0]   axi_memory_data_address_output;
+wire [DATA_ADDR_WIDTH-1:0]   axi_memory_data_address_output;
 wire [31:0]   axi_memory_data_write_data_output;
 wire [31:0]   axi_memory_data_read_data_input;
 
@@ -74,19 +78,19 @@ wire [31:0]   data_read_data_input;
 
 AXI_BUS
 #(
-  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH     ),
-  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH     ),
-  .AXI_ID_WIDTH   ( `AXI_ID_SLAVE_WIDTH ),
-  .AXI_USER_WIDTH ( `AXI_USER_WIDTH     )
+  .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
+  .AXI_DATA_WIDTH ( AXI_DATA_WIDTH     ),
+  .AXI_ID_WIDTH   ( AXI_ID_SLAVE_WIDTH ),
+  .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
 )
 slaves[1:0]();
 
 AXI_BUS
 #(
-  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH     ),
-  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH     ),
-  .AXI_ID_WIDTH   ( `AXI_ID_SLAVE_WIDTH ),
-  .AXI_USER_WIDTH ( `AXI_USER_WIDTH     )
+  .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH     ),
+  .AXI_DATA_WIDTH ( AXI_DATA_WIDTH     ),
+  .AXI_ID_WIDTH   ( AXI_ID_MASTER_WIDTH ),
+  .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
 )
 masters[1:0]();
 
@@ -106,6 +110,11 @@ wire apb_uart_event;
 
 wire apb_gpio_event;
 
+wire [31:0] interrupt_request_output;
+
+// Misc signals
+
+wire fetch_enable_output;
 
 /*
 -------------------------------------------------
@@ -113,7 +122,7 @@ wire apb_gpio_event;
 -------------------------------------------------
 */
 
-always_ff @(posedge clk)
+always_ff @(posedge clock)
 begin
   reset_n_sync <= reset_n;
 end
@@ -128,7 +137,7 @@ logic [4:0] irq_id;
 always_comb begin
   irq_id = '0;
   for (int i = 0; i < 32; i+=1) begin
-    if(irq_i[i]) begin
+    if(interrupt_request_output[i]) begin
       irq_id = i[4:0];
     end
   end
@@ -223,14 +232,15 @@ riscv_core
 
 instr_ram_wrap
   #(
-    .RAM_SIZE (INSTR_RAM_SIZE),                // in bytes
+    .RAM_SIZE   (INSTR_RAM_SIZE),                // in bytes
+    .DATA_WIDTH (AXI_DATA_WIDTH )
   ) instruction_ram_wrap_instance (
     // Clock and Reset
-    .clk            (clk                          ),
+    .clk            (clock                          ),
     .rst_n          (reset_n_sync                 ),
 
     .en_i           (instruction_request_output   ),
-    .addr_i         (instruction_address_output   ),
+    .addr_i         (instruction_address_output[INSTR_ADDR_WIDTH-1:0]   ),
     .wdata_i        ('0                           ),
     .rdata_o        (instruction_read_data_input  ),
     .we_i           ('0                           ),
@@ -238,7 +248,7 @@ instr_ram_wrap
     .bypass_en_i    ('0                           )
   );
 
-always_ff @ (posedge clk, negedge reset_n_sync)
+always_ff @ (posedge clock, negedge reset_n_sync)
 begin
   if (!reset_n_sync)
     begin
@@ -259,14 +269,14 @@ end
 
 core2axi_wrap
 #(
-  .AXI_ADDR_WIDTH   ( `AXI_ADDR_WIDTH       ),
-  .AXI_ID_WIDTH     ( `AXI_ID_MASTER_WIDTH  ),
-  .AXI_DATA_WIDTH   ( `AXI_DATA_WIDTH       ),
-  .AXI_USER_WIDTH   ( `AXI_USER_WIDTH       ),
+  .AXI_ADDR_WIDTH   ( AXI_ADDR_WIDTH       ),
+  .AXI_ID_WIDTH     ( AXI_ID_MASTER_WIDTH  ),
+  .AXI_DATA_WIDTH   ( AXI_DATA_WIDTH       ),
+  .AXI_USER_WIDTH   ( AXI_USER_WIDTH       ),
   .REGISTERED_GRANT ( "FALSE"               )
 )
 core2axi_instance (
-  .clk_i         ( clk                      ),
+  .clk_i         ( clock                      ),
   .rst_ni        ( reset_n_sync             ),
 
   .data_req_i    ( data_request_output      ),
@@ -289,28 +299,28 @@ core2axi_instance (
 
 axi_node_intf_wrap
 #(
-  .NB_MASTER      ( 1                    ),	// AXI Masters: RISCV core
+  .NB_MASTER      ( 2                    ),	// AXI Masters: RISCV core
   .NB_SLAVE       ( 2                    ),	// AXI Slaves:  Data Memory, AXI2APB bridge
-  .AXI_ADDR_WIDTH ( `AXI_ADDR_WIDTH      ),
-  .AXI_DATA_WIDTH ( `AXI_DATA_WIDTH      ),
-  .AXI_ID_WIDTH   ( `AXI_ID_MASTER_WIDTH ),
-  .AXI_USER_WIDTH ( `AXI_USER_WIDTH      )
+  .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
+  .AXI_DATA_WIDTH ( AXI_DATA_WIDTH      ),
+  .AXI_ID_WIDTH   ( AXI_ID_MASTER_WIDTH ),
+  .AXI_USER_WIDTH ( AXI_USER_WIDTH      )
 )
   axi_bus_interconnect (
 
-  .clk          (clk),
+  .clk          (clock),
   .rst_n        (reset_n_sync),
   .test_en_i    ('0),
 
-  .slave        (masters[0]), // RISCV_CORE -> CORE2AXI -> AXIBUS
+  .slave        (masters), // RISCV_CORE -> CORE2AXI -> AXIBUS
 
   .master       (slaves),     // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIPERIPHERALS
 
   // Memory map
-  .start_addr_i (),
-  .end_addr_i   ()
+  .start_addr_i ( { 32'h1A10_0000, 32'h0010_0000} ),
+  .end_addr_i   ( { 32'h1A11_FFFF, 32'h001F_FFFF} )
 
-)
+);
 
 /*
 -------------------------------------------------
@@ -320,14 +330,14 @@ axi_node_intf_wrap
 
 axi_mem_if_SP_wrap
 #(
-  .AXI_ADDR_WIDTH  ( AXI_ADDR_WIDTH     ),
-  .AXI_DATA_WIDTH  ( AXI_DATA_WIDTH     ),
-  .AXI_ID_WIDTH    ( AXI_ID_SLAVE_WIDTH ),
-  .AXI_USER_WIDTH  ( AXI_USER_WIDTH     ),
-  .MEM_ADDR_WIDTH  ( DATA_ADDR_WIDTH    )
+  .AXI_ADDR_WIDTH  ( AXI_ADDR_WIDTH           ),
+  .AXI_DATA_WIDTH  ( AXI_DATA_WIDTH           ),
+  .AXI_ID_WIDTH    ( AXI_ID_SLAVE_WIDTH       ),
+  .AXI_USER_WIDTH  ( AXI_USER_WIDTH           ),
+  .MEM_ADDR_WIDTH  ( $clog2(DATA_ADDR_WIDTH)  )
 )
 data_mem_axi_interface (
-  .clk         ( clk                                 ),
+  .clk         ( clock                                 ),
   .rst_n       ( reset_n_sync                        ),
   .test_en_i   ( '0                                  ),
 
@@ -350,7 +360,7 @@ data_mem_axi_interface (
 sp_ram_wrap
   #(
     .RAM_SIZE   (DATA_RAM_SIZE                      ), // in bytes
-    .ADDR_WIDTH ($clog2(RAM_SIZE)                   ),
+    .ADDR_WIDTH (DATA_ADDR_WIDTH                    ), // in bits
     .DATA_WIDTH (32                                 )
   )
   single_port_ram_wrap_instance  (
@@ -360,7 +370,7 @@ sp_ram_wrap
     .en_i       (axi_memory_data_request_output     ),
     .we_i       (axi_memory_data_write_enable_output),
     .be_i       (axi_memory_data_byte_enable_output ),
-    .addr_i     (axi_memory_data_address_output     ),
+    .addr_i     ({axi_memory_data_address_output[DATA_ADDR_WIDTH-AXI_B_WIDTH-1:0], {AXI_B_WIDTH{1'b0}}} ), // As each word is 4 bytes, the 2 LSB must be grounded. (A RAM fechtes a single byte per address, thus this reconfiguration is necessary to allow direct 32 bit adressing).
     .wdata_i    (axi_memory_data_write_data_output  ),
     .rdata_o    (axi_memory_data_read_data_input    ),
 
@@ -433,7 +443,7 @@ apb_uart_sv
     .APB_ADDR_WIDTH (APB_ADDR_WIDTH)  //APB slaves are 4KB by default - 12 bits
 )
   apb_uart_sv_instance (
-    .CLK        (clock                        )
+    .CLK        (clock                        ),
     .RSTN       (reset_n_sync                 ),
     /* verilator lint_off UNUSED */
     .PADDR      (apb_bus_slave_uart.paddr[4:2]),
@@ -472,7 +482,7 @@ apb_gpio
     .PENABLE      (apb_bus_slave_gpio.penable     ),
     .PRDATA       (apb_bus_slave_gpio.prdata      ),
     .PREADY       (apb_bus_slave_gpio.pready      ),
-    .PSLVERR      (apb_bus_slave_gpio.psverr      ),
+    .PSLVERR      (apb_bus_slave_gpio.pslverr     ),
 
     .gpio_in      ( gpio_input                    ),
     .gpio_out     ( gpio_output                   ),
@@ -512,4 +522,4 @@ apb_event_unit_instance (
   .core_busy_i      ( core_busy_i             )
 );
 
-endmodule;
+endmodule

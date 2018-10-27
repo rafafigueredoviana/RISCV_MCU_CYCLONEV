@@ -55,16 +55,16 @@ module periph_bus_wrap
   // External APB Master bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_ext (
-  .apb_master(apb_slave),
-  .apb_slave(s_slave)
+  .apb_master(s_slave),
+  .apb_slave(apb_slave)
   );
   //`APB_ASSIGN_SLAVE(s_slave, apb_slave);
 
   // UART APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_uart (
-  .apb_master(s_masters[0]),
-  .apb_slave(uart_master)
+  .apb_master(uart_master),
+  .apb_slave(s_masters[0])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[0], uart_master);
@@ -73,9 +73,9 @@ module periph_bus_wrap
 
   // GPIO APB bus assign
 
-  APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_apb (
-  .apb_master(s_masters[1]),
-  .apb_slave(gpio_master)
+  APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_gpio (
+  .apb_master(gpio_master),
+  .apb_slave(s_masters[1])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[1], gpio_master);
@@ -85,8 +85,8 @@ module periph_bus_wrap
   // SPI APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_spi (
-  .apb_master(s_masters[2]),
-  .apb_slave(spi_master)
+  .apb_master(spi_master),
+  .apb_slave(s_masters[2])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[2], spi_master);
@@ -96,8 +96,8 @@ module periph_bus_wrap
   // Timer APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_timer (
-  .apb_master(s_masters[3]),
-  .apb_slave(timer_master)
+  .apb_master(timer_master),
+  .apb_slave(s_masters[3])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[3], timer_master);
@@ -107,8 +107,8 @@ module periph_bus_wrap
   // Event Unit APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_event_unit (
-  .apb_master(s_masters[5]),
-  .apb_slave(event_unit_master)
+  .apb_master(event_unit_master),
+  .apb_slave(s_masters[4])
   );
 
 //  `APB_ASSIGN_MASTER(s_masters[4], event_unit_master);
@@ -118,8 +118,8 @@ module periph_bus_wrap
   // I2C APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_i2c (
-  .apb_master(s_masters[5]),
-  .apb_slave(i2c_master)
+  .apb_master(i2c_master),
+  .apb_slave(s_masters[5])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[5], i2c_master);
@@ -129,8 +129,8 @@ module periph_bus_wrap
   // FLL APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_fll (
-  .apb_master(s_masters[6]),
-  .apb_slave(fll_master)
+  .apb_master(fll_master),
+  .apb_slave(s_masters[6])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[6], fll_master);
@@ -140,8 +140,8 @@ module periph_bus_wrap
   // SOC Control APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_soc_ctrl (
-  .apb_master(s_masters[7]),
-  .apb_slave(soc_ctrl_master)
+  .apb_master(soc_ctrl_master),
+  .apb_slave(s_masters[7])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[7], soc_ctrl_master);
@@ -151,8 +151,8 @@ module periph_bus_wrap
   // Debbug Master APB bus assign
 
   APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_dbg_master (
-  .apb_master(s_masters[8]),
-  .apb_slave(debug_master)
+  .apb_master(debug_master),
+  .apb_slave(s_masters[8])
   );
 
   //`APB_ASSIGN_MASTER(s_masters[8], debug_master);
