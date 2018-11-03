@@ -48,12 +48,12 @@ module de10_top(
   input  wire        hps_0_uart0_rxd,                  //                  .rxd
   output wire        hps_0_uart0_txd,                   //                  .txd
 */
-  inout wire         hps_io_hps_io_gpio_inst_LOANIO49, // Quartus will assign this pin automatically to PIN_A22 via pin_assignments.tcl script
-  inout wire         hps_io_hps_io_gpio_inst_LOANIO50  // Quartus will assign this pin automatically to PIN_B21 via pin_assignments.tcl script
+  inout wire         hps_io_hps_io_gpio_inst_LOANIO49, // Quartus will assign these pins
+  inout wire         hps_io_hps_io_gpio_inst_LOANIO50
   );
 
-wire UART_RX_LOAN;
-wire UART_TX_LOAN;
+wire hps_0_uart0_rxd;
+wire hps_0_uart0_txd;
 
 mcu_top_riscv mcu_instance(
 
@@ -68,8 +68,8 @@ mcu_top_riscv mcu_instance(
 
   // UART signals
 
-  .uart_rx_input(hps_0_uart0_rxd),
-  .uart_tx_output(hps_0_uart0_txd),
+  .uart_rx_input(hps_0_uart0_txd),
+  .uart_tx_output(hps_0_uart0_rxd),
 
   // GPIO signals
 
