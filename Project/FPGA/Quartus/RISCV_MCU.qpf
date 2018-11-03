@@ -18,13 +18,14 @@
 #
 # Quartus Prime
 # Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-# Date created = 13:32:46  October 21, 2018
+# Date created = 12:49:07  November 03, 2018
 #
 # -------------------------------------------------------------------------- #
 
 QUARTUS_VERSION = "18.1"
-DATE = "13:32:46  October 21, 2018"
+DATE = "12:49:07  November 03, 2018"
 
 # Revisions
 
+PROJECT_REVISION = "RISCV_MCU"
 PROJECT_REVISION = "mcu_top_riscv"

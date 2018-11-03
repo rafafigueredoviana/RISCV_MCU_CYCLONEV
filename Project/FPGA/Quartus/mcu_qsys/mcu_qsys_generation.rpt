@@ -1,0 +1,45 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate /home/rafael/Documentos/RISCV_MCU_CYCLONEV/Project/FPGA/Quartus/mcu_qsys.qsys --block-symbol-file --output-directory=/home/rafael/Documentos/RISCV_MCU_CYCLONEV/Project/FPGA/Quartus/mcu_qsys --family="Cyclone V" --part=5CSEBA6U23I7
+Progress: Loading Quartus/mcu_qsys.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 18.1]
+Progress: Parameterizing module clk_0
+Progress: Adding hps_0 [altera_hps 18.1]
+Progress: Parameterizing module hps_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: mcu_qsys.hps_0: HPS Main PLL counter settings: n = 0  m = 63
+Info: mcu_qsys.hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Warning: mcu_qsys.hps_0: ODT is disabled. Enabling ODT (Mode Register 1) may improve signal integrity
+Info: qsys-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/rafael/Documentos/RISCV_MCU_CYCLONEV/Project/FPGA/Quartus/mcu_qsys.qsys --synthesis=VERILOG --output-directory=/home/rafael/Documentos/RISCV_MCU_CYCLONEV/Project/FPGA/Quartus/mcu_qsys/synthesis --family="Cyclone V" --part=5CSEBA6U23I7
+Progress: Loading Quartus/mcu_qsys.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 18.1]
+Progress: Parameterizing module clk_0
+Progress: Adding hps_0 [altera_hps 18.1]
+Progress: Parameterizing module hps_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: mcu_qsys.hps_0: HPS Main PLL counter settings: n = 0  m = 63
+Info: mcu_qsys.hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Warning: mcu_qsys.hps_0: ODT is disabled. Enabling ODT (Mode Register 1) may improve signal integrity
+Info: mcu_qsys: Generating mcu_qsys "mcu_qsys" for QUARTUS_SYNTH
+Info: hps_0: "Running  for module: hps_0"
+Info: hps_0: HPS Main PLL counter settings: n = 0  m = 63
+Info: hps_0: HPS peripherial PLL counter settings: n = 0  m = 39
+Warning: hps_0: ODT is disabled. Enabling ODT (Mode Register 1) may improve signal integrity
+Info: hps_0: "mcu_qsys" instantiated altera_hps "hps_0"
+Info: fpga_interfaces: "hps_0" instantiated altera_interface_generator "fpga_interfaces"
+Info: hps_io: "hps_0" instantiated altera_hps_io "hps_io"
+Info: border: "hps_io" instantiated altera_interface_generator "border"
+Info: mcu_qsys: Done "mcu_qsys" with 5 modules, 48 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

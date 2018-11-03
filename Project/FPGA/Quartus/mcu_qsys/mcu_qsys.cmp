@@ -1,0 +1,38 @@
+	component mcu_qsys is
+		port (
+			clk_clk                          : in    std_logic                     := 'X';             -- clk
+			hps_0_h2f_loan_io_in             : out   std_logic_vector(66 downto 0);                    -- in
+			hps_0_h2f_loan_io_out            : in    std_logic_vector(66 downto 0) := (others => 'X'); -- out
+			hps_0_h2f_loan_io_oe             : in    std_logic_vector(66 downto 0) := (others => 'X'); -- oe
+			hps_0_uart0_cts                  : in    std_logic                     := 'X';             -- cts
+			hps_0_uart0_dsr                  : in    std_logic                     := 'X';             -- dsr
+			hps_0_uart0_dcd                  : in    std_logic                     := 'X';             -- dcd
+			hps_0_uart0_ri                   : in    std_logic                     := 'X';             -- ri
+			hps_0_uart0_dtr                  : out   std_logic;                                        -- dtr
+			hps_0_uart0_rts                  : out   std_logic;                                        -- rts
+			hps_0_uart0_out1_n               : out   std_logic;                                        -- out1_n
+			hps_0_uart0_out2_n               : out   std_logic;                                        -- out2_n
+			hps_0_uart0_rxd                  : in    std_logic                     := 'X';             -- rxd
+			hps_0_uart0_txd                  : out   std_logic;                                        -- txd
+			hps_io_hps_io_gpio_inst_LOANIO49 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO49
+			hps_io_hps_io_gpio_inst_LOANIO50 : inout std_logic                     := 'X';             -- hps_io_gpio_inst_LOANIO50
+			memory_mem_a                     : out   std_logic_vector(12 downto 0);                    -- mem_a
+			memory_mem_ba                    : out   std_logic_vector(2 downto 0);                     -- mem_ba
+			memory_mem_ck                    : out   std_logic;                                        -- mem_ck
+			memory_mem_ck_n                  : out   std_logic;                                        -- mem_ck_n
+			memory_mem_cke                   : out   std_logic;                                        -- mem_cke
+			memory_mem_cs_n                  : out   std_logic;                                        -- mem_cs_n
+			memory_mem_ras_n                 : out   std_logic;                                        -- mem_ras_n
+			memory_mem_cas_n                 : out   std_logic;                                        -- mem_cas_n
+			memory_mem_we_n                  : out   std_logic;                                        -- mem_we_n
+			memory_mem_reset_n               : out   std_logic;                                        -- mem_reset_n
+			memory_mem_dq                    : inout std_logic_vector(7 downto 0)  := (others => 'X'); -- mem_dq
+			memory_mem_dqs                   : inout std_logic                     := 'X';             -- mem_dqs
+			memory_mem_dqs_n                 : inout std_logic                     := 'X';             -- mem_dqs_n
+			memory_mem_odt                   : out   std_logic;                                        -- mem_odt
+			memory_mem_dm                    : out   std_logic;                                        -- mem_dm
+			memory_oct_rzqin                 : in    std_logic                     := 'X';             -- oct_rzqin
+			reset_reset_n                    : in    std_logic                     := 'X'              -- reset_n
+		);
+	end component mcu_qsys;
+

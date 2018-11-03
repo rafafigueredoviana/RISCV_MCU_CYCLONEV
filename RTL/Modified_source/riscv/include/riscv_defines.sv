@@ -388,8 +388,8 @@ parameter C_FFLAG             = 5;
 
 // File: riscv_alu.sv
 // This was removed from RISCV parameter to allow Quartus II `ifdef macro interpretation. Had to rewrite some portions of the RISCV core design to allow Quartus software to synthesize it.
-`define FPU            = 1
-parameter FPU = 1;
+//`define FPU            = 1
+parameter FPU = 0;
 //`define SHARED_INT_DIV = 0
 
 // File: riscv_cs_registers.sv

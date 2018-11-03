@@ -316,8 +316,8 @@ module riscv_ex_stage
     .ex_ready_i      ( ex_ready_o           )
   );
 
-   generate
-      if (FPU == 1) begin
+
+      `ifdef FPU
          ////////////////////////////////////////////////////
          //     _    ____  _   _   ____ ___ ____  ____     //
          //    / \  |  _ \| | | | |  _ \_ _/ ___||  _ \    //
@@ -365,7 +365,7 @@ module riscv_ex_stage
          assign apu_perf_wb_o  = wb_contention | wb_contention_lsu;
          assign apu_ready_wb_o = ~(apu_active | apu_en_i | apu_stall) | apu_valid;
 
-         if ( SHARED_FP == 1) begin
+         `ifdef SHARED_FP
             assign apu_master_req_o      = apu_req;
             assign apu_master_ready_o    = apu_ready;
             assign apu_gnt               = apu_master_gnt_i;
@@ -374,8 +374,8 @@ module riscv_ex_stage
             assign apu_master_op_o       = apu_op_i;
             assign apu_result            = apu_master_result_i;
             assign fpu_fflags_we_o       = apu_valid;
-         end
-         else begin
+
+         `else
 
          //////////////////////////////
          //   ______ _____  _    _   //
@@ -415,10 +415,10 @@ module riscv_ex_stage
             assign apu_master_op_o          = '0;
             assign apu_gnt                  = 1'b1;
 
-         end
+         `endif
 
-      end
-      else begin
+
+      `else
          // default assignements for the case when no FPU/APU is attached.
          assign apu_master_req_o         = '0;
          assign apu_master_ready_o       = 1'b1;
@@ -440,8 +440,8 @@ module riscv_ex_stage
          assign apu_write_dep_o = 1'b0;
          assign fpu_fflags_we_o = 1'b0;
          assign fpu_fflags_o    = '0;
-      end
-   endgenerate
+
+   `endif
 
    assign apu_busy_o = apu_active;
 

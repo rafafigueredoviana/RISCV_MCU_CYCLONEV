@@ -12,7 +12,7 @@
 `ifndef CONFIG_SV
 
 package RISCV_MCU_CONFIG;
-
+`define PULP_FPGA_EMUL
 `define CONFIG_SV
   `define RISCV
   //`define SIMULATION
@@ -56,7 +56,7 @@ package RISCV_MCU_CONFIG;
 
   // File: riscv_alu.sv
   // This was removed from RISCV parameter to allow Quartus II `ifdef macro interpretation. Had to rewrite some portions of the RISCV core design to allow Quartus software to synthesize it.
-  `define FPU            = 1
+  //`define FPU            = 0
   //`define SHARED_INT_DIV = 0
 
   // File: riscv_cs_registers.sv

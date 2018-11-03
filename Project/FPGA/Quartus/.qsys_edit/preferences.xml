@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+ <debug showDebugMenu="0" />
+ <systemtable filter="All Interfaces">
+  <columns>
+   <connections preferredWidth="79" />
+   <irq preferredWidth="34" />
+  </columns>
+ </systemtable>
+ <library
+   expandedCategories="Library/Processors and Peripherals/Hard Processor Systems,Library,Library/Processors and Peripherals/Hard Processor Components,Library/Processors and Peripherals,Project" />
+ <window width="1920" height="984" x="0" y="30" />
+ <hdlexample language="VERILOG" />
+</preferences>

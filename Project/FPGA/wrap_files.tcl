@@ -36,6 +36,8 @@ file delete -force tb_axi_write_only.sv
 
 file delete -force fpu_shared.sv
 
+file delete -force fpu_defs.sv
+
 foreach system_verilog_file [glob "*.sv"] {
 
   set_global_assignment -name SYSTEMVERILOG_FILE ./rtl_wrap/$system_verilog_file
