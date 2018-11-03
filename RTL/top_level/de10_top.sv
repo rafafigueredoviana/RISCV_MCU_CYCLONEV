@@ -48,8 +48,8 @@ module de10_top(
   input  wire        hps_0_uart0_rxd,                  //                  .rxd
   output wire        hps_0_uart0_txd,                   //                  .txd
 */
-  inout wire         hps_io_hps_io_gpio_inst_LOANIO49, // Quartus will assign these pins
-  inout wire         hps_io_hps_io_gpio_inst_LOANIO50
+  inout wire         hps_io_hps_io_gpio_inst_LOANIO49, // Quartus will assign this pin automatically to PIN_A22 via pin_assignments.tcl script
+  inout wire         hps_io_hps_io_gpio_inst_LOANIO50  // Quartus will assign this pin automatically to PIN_B21 via pin_assignments.tcl script
   );
 
 wire UART_RX_LOAN;

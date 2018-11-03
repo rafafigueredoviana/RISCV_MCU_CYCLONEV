@@ -30,5 +30,7 @@ To view the RTL schematic, go to
 ``
 
 On `` Tools -> Tcl scripts ``
+
+
 PS:
 You *MUST* run the hps_sdram_p0_pin_assignments.tcl, otherwise the fitter will not be able to route FPGA<->HPS ports.
