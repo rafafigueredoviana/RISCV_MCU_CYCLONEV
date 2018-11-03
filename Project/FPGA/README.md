@@ -8,10 +8,11 @@ To elaborate the project, first open the Quartus folder and open the RISCV_MCU.q
   ``
   ../wrap_files.tcl
   ``
-   It will give an error, but the key source files will be added to the project. Check them at
+   The key source files will be added to the project. Check them at
 ``
     Assignment -> Settings -> Files
 ``
+
 Now, run "Analysis and Elaboration" at
 ``
 Processing -> Start -> Start Analysis and Elaboration
