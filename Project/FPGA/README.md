@@ -23,3 +23,15 @@ To view the RTL schematic, go to
 ``
  Tools -> Netlist Viewers -> RTL Viewer
  ``
+
+ To make a full sinthesis run, after elaborating the project run
+ ``
+ hps_sdram_p0_pin_assignments.tcl
+``
+
+On
+
+``
+ Tools -> Tcl scripts
+``
+You *MUST* run the hps_sdram_p0_pin_assignments.tcl, otherwise the fitter will not be able to route FPGA<->HPS ports.
