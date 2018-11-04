@@ -146,7 +146,7 @@ end
 riscv_core
 #(
   .N_EXT_PERF_COUNTERS   (     0       ),
-  .FPU                   ( RISCY_RV32F ),
+  .FPU                   (     0       ),
   .SHARED_FP             (     0       ),
   .SHARED_FP_DIVSQRT     (     2       )
 )
