@@ -6,7 +6,7 @@ help:
 
 .PHONY: all
 all: #clean
-	vsim -do build_simulation.tcl &
+	vsim -do build_simulation.tcl 
 
 .PHONY: clean
 clean:
