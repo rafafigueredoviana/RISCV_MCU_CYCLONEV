@@ -76,8 +76,8 @@ module riscv_apu_disp (
   logic               req_accepted;
   logic               active;
   logic [1:0]         apu_lat;
-   
-   
+
+
   logic [2:0] read_deps_req,  read_deps_inflight,  read_deps_waiting;
   logic [1:0] write_deps_req, write_deps_inflight, write_deps_waiting;
   logic       read_dep_req,   read_dep_inflight,   read_dep_waiting;
@@ -90,7 +90,7 @@ module riscv_apu_disp (
   assign addr_req     = apu_waddr_i;
 
   assign req_accepted = valid_req & apu_master_gnt_i;
-   
+
   //
   // In-flight instructions
   //
@@ -106,7 +106,7 @@ module riscv_apu_disp (
       valid_waiting    <= 1'b0;
       addr_inflight    <= '0;
       addr_waiting     <= '0;
-    end else begin     
+    end else begin
        valid_inflight  <= valid_inflight_dn;
        valid_waiting   <= valid_waiting_dn;
        addr_inflight   <= addr_inflight_dn;
@@ -126,11 +126,11 @@ module riscv_apu_disp (
         if (valid_inflight & !(returned_inflight)) begin // we already have an inflight instruction!
            valid_waiting_dn = 1'b1;
            addr_waiting_dn  = addr_inflight;
-        end 
+        end
         if (returned_waiting) begin // we have received a new request and waiting goes out of the pipe but will be refilled
            valid_waiting_dn = 1'b1;
            addr_waiting_dn  = addr_inflight;
-        end 
+        end
      end // no new request
      else if (returned_inflight) begin // multicycle request has returned
         valid_inflight_dn   = '0;
@@ -143,7 +143,7 @@ module riscv_apu_disp (
         addr_waiting_dn     = '0;
      end
   end
-   
+
   //
   // Active type
   //
@@ -176,10 +176,10 @@ module riscv_apu_disp (
 
   genvar k;
   generate
-    for (k = 0; i < 2; i++) begin : generate_block_identifier_2
-      assign write_deps_req[i]      = (write_regs_i[i] == addr_req)      & write_regs_valid_i[i];
-      assign write_deps_inflight[i] = (write_regs_i[i] == addr_inflight) & write_regs_valid_i[i];
-      assign write_deps_waiting[i]  = (write_regs_i[i] == addr_waiting)  & write_regs_valid_i[i];
+    for (k = 0; k < 2; k++) begin : generate_block_identifier_2
+      assign write_deps_req[k]      = (write_regs_i[k] == addr_req)      & write_regs_valid_i[k];
+      assign write_deps_inflight[k] = (write_regs_i[k] == addr_inflight) & write_regs_valid_i[k];
+      assign write_deps_waiting[k]  = (write_regs_i[k] == addr_waiting)  & write_regs_valid_i[k];
     end
   endgenerate
 
@@ -233,18 +233,18 @@ module riscv_apu_disp (
   // Performance counter signals
   assign perf_type_o = stall_type;
   assign perf_cont_o = stall_nack;
-   
+
   assign apu_multicycle_o  =  (apu_lat == 2'h3);
   assign apu_singlecycle_o = ~(valid_inflight | valid_waiting);
-   
+
   //
   // Assertions
   //
-  
+
 `ifndef VERILATOR
   assert property (
     @(posedge clk_i) (apu_master_valid_i) |-> (valid_req | valid_inflight | valid_waiting))
     else $warning("[APU Dispatcher] instruction returned while no instruction is in-flight");
 `endif
-   
+
 endmodule

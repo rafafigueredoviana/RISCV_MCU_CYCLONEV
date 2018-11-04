@@ -49,7 +49,7 @@ reg reset_n_sync;
 
 wire          instruction_request_output;
 wire          instruction_granted_input;
-wire          instruction_read_valid_input;
+reg           instruction_read_valid_input;
 wire [31:0]   instruction_address_output;
 wire [31:0]   instruction_read_data_input;
 
@@ -334,7 +334,7 @@ axi_mem_if_SP_wrap
   .AXI_DATA_WIDTH  ( AXI_DATA_WIDTH           ),
   .AXI_ID_WIDTH    ( AXI_ID_SLAVE_WIDTH       ),
   .AXI_USER_WIDTH  ( AXI_USER_WIDTH           ),
-  .MEM_ADDR_WIDTH  ( $clog2(DATA_ADDR_WIDTH)  )
+  .MEM_ADDR_WIDTH  ( $clog2(DATA_RAM_SIZE)    )
 )
 data_mem_axi_interface (
   .clk         ( clock                                 ),
@@ -421,13 +421,13 @@ periph_bus_wrap
 
     .uart_master      (apb_bus_slave_uart), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> UART
     .gpio_master      (apb_bus_slave_gpio), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> GPIO
-    .spi_master       (),
-    .timer_master     (),
-    .event_unit_master(apb_bus_slave_event_unit), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> EVENT_UNIT
-    .i2c_master       (),
-    .fll_master       (),
-    .soc_ctrl_master  (),
-    .debug_master     ()
+    //.spi_master       (),
+    //.timer_master     (),
+    .event_unit_master(apb_bus_slave_event_unit) // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS -> EVENT_UNIT
+    //.i2c_master       (),
+    //.fll_master       (),
+    //.soc_ctrl_master  (),
+    //.debug_master     ()
 
     );
 
