@@ -53,4 +53,10 @@ foreach design_rtl [concat $source_rtl] {
     vlog -work $Project_name $design_rtl
 }
 
-vsim RISCV_MCU.mcu_top_riscv
+
+
+vsim RISCV_MCU.mcu_top_level_tb
+
+do ../wave.do
+
+run 1 us

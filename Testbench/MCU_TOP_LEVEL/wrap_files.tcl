@@ -5,7 +5,9 @@ if {[file isdirectory rtl_wrap] == 0} {
 
 source ../source_files.tcl
 
-foreach design [concat $ORIGINAL_SOURCES $MODIFIED_SOURCES $MCU_FILES] {    
+file copy -force ../mcu_top_level_tb.sv rtl_wrap
+
+foreach design [concat $ORIGINAL_SOURCES $MODIFIED_SOURCES $MCU_FILES] {
     set design_files_verilog [glob -directory  $design "*.*v*"]
     foreach file_inc_verilog [concat $design_files_verilog] {
         file copy -force $file_inc_verilog rtl_wrap
