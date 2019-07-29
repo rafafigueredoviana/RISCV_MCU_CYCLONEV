@@ -4,6 +4,10 @@
 
 A basic implementation of the RISCV core into a DE10nano FPGA board. Its main components will be featured from the [Pulpino Project](https://github.com/pulp-platform/pulpino).
 
+To use this project, you will need to clone the Pulpino repo that is inside the folder tree. In order to do this, use the following command:
+
+git clone --recurse-submodules https://github.com/rafafigueredoviana/RISCV_MCU_CYCLONEV.git
+
 # Components:
 
 Note: As the system is built, its components will be described here.
