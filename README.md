@@ -8,6 +8,10 @@ To use this project, you will need to clone the Pulpino repo that is inside the 
 
 git clone --recurse-submodules https://github.com/rafafigueredoviana/RISCV_MCU_CYCLONEV.git
 
+If you have already downloaded the repository and wants to clone Pulpino's sumodule, use the following command:
+
+git submodule update --init --recursive
+
 # Components:
 
 Note: As the system is built, its components will be described here.
