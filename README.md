@@ -12,6 +12,8 @@ If you have already downloaded the repository and wants to clone Pulpino's sumod
 
 git submodule update --init --recursive
 
+Note: Due to some bugs while running update-ips.py in pulipino repository, i've added the repo's files inside a .zip file, located at /RTL.
+
 # Components:
 
 Note: As the system is built, its components will be described here.
