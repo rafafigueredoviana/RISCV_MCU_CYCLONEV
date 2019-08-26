@@ -45,6 +45,7 @@ set source_rtl [glob -directory  rtl_wrap "*.*v"]
 
 puts "\nCompiling project files..."
 
+vlog -work $Project_name rtl_wrap/config.sv
 vlog -work $Project_name rtl_wrap/apu_core_package.sv
 vlog -work $Project_name rtl_wrap/riscv_defines.sv
 vlog -work $Project_name rtl_wrap/riscv_tracer_defines.sv
