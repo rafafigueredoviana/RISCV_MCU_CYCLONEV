@@ -27,7 +27,11 @@ int main()
 
   }
 
-  *pointer_apb = 0x1;
+  for (int i = 0; i < 10; i++){
+    *pointer_apb ^= 0x1;
+
+  }
+  
 
   return 0;
 }

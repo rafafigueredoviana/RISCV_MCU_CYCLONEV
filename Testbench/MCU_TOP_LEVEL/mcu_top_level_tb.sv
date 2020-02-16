@@ -7,7 +7,7 @@ reg fetch_en;
 
 always #20 clk = ~clk;
 
-
+reg [31:0] GPIO_OUT;
 
 
 initial begin
@@ -43,10 +43,16 @@ mcu_top_riscv mcu_top_inst (
   // GPIO signals
 
   .gpio_input           (),
-  .gpio_output          (),
+  .gpio_output          (GPIO_OUT),
   .gpio_direction       ()
 
 );
 
+always @ (posedge GPIO_OUT[0]) begin
+
+  $display("GPIO[0] Edge trigger output sucess!");
+
+
+end
 
 endmodule
