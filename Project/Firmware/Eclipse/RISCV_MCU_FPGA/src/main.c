@@ -16,8 +16,8 @@ int main()
   int *pointer_apb;
   int value = 10;
   pointer_ram = (int *) DATA_RAM_BASE;
-  pointer_apb = (int *) GPIO_ADDR;
-  pointer_apb++;
+  pointer_apb = (int *) (GPIO_ADDR + 0x08);
+  // pointer_apb++;
   pointer_ram++;
 
   for (int i = 0; i < 10; i++){
@@ -27,7 +27,7 @@ int main()
 
   }
 
-  *pointer_apb = 1;
+  *pointer_apb = 0x1;
 
   return 0;
 }
