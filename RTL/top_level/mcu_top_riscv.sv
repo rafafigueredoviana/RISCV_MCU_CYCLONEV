@@ -47,13 +47,30 @@ reg reset_n_sync;
 
 // Instruction Memory Signals
 
-wire          instruction_request_output;
-wire          instruction_granted_input;
-reg           instruction_read_valid_input;
-wire [31:0]   instruction_address_output;
-wire [31:0]   instruction_read_data_input;
+wire          core_inst_request_output;
+wire          core_inst_granted_input;
+reg           core_inst_read_valid_input;
+wire [31:0]   core_inst_address_output;
+wire [31:0]   core_inst_read_data_input;
 
-// AXI2MEM Signals
+// Instruction Memory Signals
+
+wire          inst_mem_enable_output;
+wire [31:0]   inst_mem_address_output;
+wire [31:0]   inst_mem_read_data_input;
+
+// AXI2MEM INST Signals
+
+wire          axi_memory_inst_request_input;
+wire          axi_memory_inst_granted_output;
+wire          axi_memory_inst_valid_output;
+wire          axi_memory_inst_write_enable_output;
+wire [ 3:0]   axi_memory_inst_byte_enable_output;
+wire [INSTR_ADDR_WIDTH-1:0]   axi_memory_inst_address_output;
+wire [31:0]   axi_memory_inst_write_data_output;
+wire [31:0]   axi_memory_inst_read_data_input;
+
+// AXI2MEM DATA Signals
 
 wire          axi_memory_data_request_output;
 wire          axi_memory_data_write_enable_output;
@@ -83,7 +100,7 @@ AXI_BUS
   .AXI_ID_WIDTH   ( AXI_ID_SLAVE_WIDTH ),
   .AXI_USER_WIDTH ( AXI_USER_WIDTH     )
 )
-slaves[1:0]();
+slaves[2:0]();
 
 AXI_BUS
 #(
@@ -164,11 +181,11 @@ riscv_core
   .cluster_id_i          (6'h0          ),
 
   // Instruction memory interface
-  .instr_req_o           (instruction_request_output    ),
-  .instr_gnt_i           (instruction_request_output    ),
-  .instr_rvalid_i        (instruction_read_valid_input  ),
-  .instr_addr_o          (instruction_address_output    ),
-  .instr_rdata_i         (instruction_read_data_input   ),
+  .instr_req_o           (core_inst_request_output    ),
+  .instr_gnt_i           (core_inst_granted_input     ),
+  .instr_rvalid_i        (core_inst_read_valid_input  ),
+  .instr_addr_o          (core_inst_address_output    ),
+  .instr_rdata_i         (core_inst_read_data_input   ),
 
   // Data memory interface
   .data_req_o            (data_request_output           ),
@@ -226,6 +243,80 @@ riscv_core
 
 /*
 -------------------------------------------------
+       AXI2Memory Bridge (INST MEMORY)
+-------------------------------------------------
+*/
+
+axi_mem_if_SP_wrap
+#(
+  .AXI_ADDR_WIDTH  ( AXI_ADDR_WIDTH           ),
+  .AXI_DATA_WIDTH  ( AXI_DATA_WIDTH           ),
+  .AXI_ID_WIDTH    ( AXI_ID_SLAVE_WIDTH       ),
+  .AXI_USER_WIDTH  ( AXI_USER_WIDTH           ),
+  .MEM_ADDR_WIDTH  ( $clog2(DATA_RAM_SIZE)    )
+)
+data_mem_axi_interface (
+  .clk         ( clock                                 ),
+  .rst_n       ( reset_n_sync                        ),
+  .test_en_i   ( '0                                  ),
+
+  .mem_req_o   ( axi_memory_inst_request_output      ),
+  .mem_we_o    (                                     ),
+  .mem_be_o    (                                     ),
+  .mem_addr_o  ( axi_memory_data_address_output      ),
+  .mem_wdata_o (                                     ),
+  .mem_rdata_i ( axi_memory_data_read_data_input     ),
+
+  .slave       ( slaves[0]                           )  // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIMEM
+);
+
+/*
+-------------------------------------------------
+       Mux INST RAM
+-------------------------------------------------
+*/
+
+ ram_mux
+ #(
+  .ADDR_WIDTH ( DATA_ADDR_WIDTH ),
+  .IN0_WIDTH  ( `AXI_DATA_WIDTH  ),
+  .IN1_WIDTH  ( 32              ),
+  .OUT_WIDTH  ( `AXI_DATA_WIDTH  )
+ )
+ data_ram_mux_i
+ (
+  .clk            ( clk_int                                                                                 ),
+  .rst_n          ( rstn_int                                                                                ),
+
+  .port0_req_i    ( axi_memory_inst_request_input                                                           ),
+  .port0_gnt_o    ( axi_memory_inst_granted_output                                                          ),
+  .port0_rvalid_o ( axi_memory_inst_valid_output                                                            ),
+  .port0_addr_i   ( {axi_memory_data_address_output[INSTR_ADDR_WIDTH-AXI_B_WIDTH-1:0], {AXI_B_WIDTH{1'b0}}} ),
+  .port0_we_i     ( '0                                                                                      ),
+  .port0_be_i     ( '1                                                                                      ),
+  .port0_rdata_o  ( axi_memory_data_read_data_input                                                         ),
+  .port0_wdata_i  (                                                                                         ),
+
+  .port1_req_i    ( core_inst_request_output                                                                ),
+  .port1_gnt_o    ( core_inst_granted_input                                                                 ),
+  .port1_rvalid_o ( core_inst_read_valid_input                                                              ),
+  .port1_addr_i   ( core_inst_address_output  [INSTR_ADDR_WIDTH-1:0]                                        ),
+  .port1_we_i     ( '0                                                                                      ),
+  .port1_be_i     ( '1                                                                                      ),
+  .port1_rdata_o  ( core_inst_read_data_input                                                               ),
+  .port1_wdata_i  ( '0                                                                                      ),
+
+  .ram_en_o       ( inst_mem_enable_output                                                                  ),
+  .ram_addr_o     ( inst_mem_address_output                                                                 ),
+  .ram_we_o       (                                                                                         ),
+  .ram_be_o       (                                                                                         ),
+  .ram_rdata_i    ( inst_mem_read_data_input                                                               ),
+  .ram_wdata_o    (                                                                                         )
+ );
+
+
+/*
+-------------------------------------------------
               Instruction RAM
 -------------------------------------------------
 */
@@ -240,9 +331,9 @@ instr_ram_wrap
     .rst_n          (reset_n_sync                 ),
 
     .en_i           (instruction_request_output   ),
-    .addr_i         (instruction_address_output[INSTR_ADDR_WIDTH-1:0]   ),
+    .addr_i         (   ),
     .wdata_i        ('0                           ),
-    .rdata_o        (instruction_read_data_input  ),
+    .rdata_o        (  ),
     .we_i           ('0                           ),
     .be_i           ('1                           ),
     .bypass_en_i    ('0                           )
@@ -300,7 +391,7 @@ core2axi_instance (
 axi_node_intf_wrap
 #(
   .NB_MASTER      ( 2                    ),	// AXI Masters: RISCV core
-  .NB_SLAVE       ( 2                    ),	// AXI Slaves:  Data Memory, AXI2APB bridge
+  .NB_SLAVE       ( 3                    ),	// AXI Slaves:  Instruction Memory, Data Memory, AXI2APB bridge
   .AXI_ADDR_WIDTH ( AXI_ADDR_WIDTH      ),
   .AXI_DATA_WIDTH ( AXI_DATA_WIDTH      ),
   .AXI_ID_WIDTH   ( AXI_ID_MASTER_WIDTH ),
@@ -316,15 +407,15 @@ axi_node_intf_wrap
 
   .master       (slaves),     // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIPERIPHERALS
 
-  // Memory map
-  .start_addr_i ( { 32'h1A10_0000, 32'h0010_0000} ),
-  .end_addr_i   ( { 32'h1A11_FFFF, 32'h001F_FFFF} )
+  // Memory map         APB           DATA MEM      INST MEM 
+  .start_addr_i ( { 32'h1A10_0000, 32'h0010_0000, 32'h0000_0000} ),
+  .end_addr_i   ( { 32'h1A11_FFFF, 32'h001F_FFFF, 32'h0000_FFFF} )
 
 );
 
 /*
 -------------------------------------------------
-                 AXI2Memory Bridge
+       AXI2Memory Bridge (DATA MEMORY)
 -------------------------------------------------
 */
 
@@ -348,7 +439,7 @@ data_mem_axi_interface (
   .mem_wdata_o ( axi_memory_data_write_data_output   ),
   .mem_rdata_i ( axi_memory_data_read_data_input     ),
 
-  .slave       ( slaves[0]                           )  // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIMEM
+  .slave       ( slaves[1]                           )  // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXIMEM
 );
 
 /*
@@ -396,7 +487,7 @@ axi2apb_wrap
     .rst_ni       (reset_n_sync         ),
     .test_en_i    (                     ),
 
-    .axi_slave    (slaves[1]            ), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB
+    .axi_slave    (slaves[2]            ), // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB
 
     .apb_master   (apb_bus_master       ) // RISCV_CORE -> CORE2AXI -> AXIBUS -> AXI2APB -> APBBUS
 
