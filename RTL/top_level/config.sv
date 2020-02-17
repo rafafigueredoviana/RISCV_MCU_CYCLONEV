@@ -12,10 +12,10 @@
 `ifndef CONFIG_SV
 
 package RISCV_MCU_CONFIG;
-`define PULP_FPGA_EMUL
+// `define PULP_FPGA_EMUL
 `define CONFIG_SV
-  `define RISCV
-  //`define SIMULATION
+`define RISCV
+`define SIMULATION
    //`define PULP_FPGA_EMUL
   // always define ASIC when we do a synthesis run
   `ifndef SIMULATION

@@ -36,7 +36,22 @@ module instr_ram_wrap
 
   assign is_boot = (addr_i[ADDR_WIDTH-1] == 1'b1);
 
+`ifndef PULP_FPGA_EMUL
 
+  inst_rom_wrap
+  #(
+    .DATA_WIDTH ( DATA_WIDTH )
+  )
+  inst_rom_wrap_i
+  (
+    .clk     ( clk                         ),
+    .rst_n   ( rst_n                       ),
+    .en_i    ( en_i & is_boot              ),
+    .addr_i  ( addr_i[ADDR_WIDTH-1:0] ),
+    .rdata_o ( rdata_ram                  )
+  );
+
+`else 
   sp_ram_wrap
   #(
     .RAM_SIZE   ( RAM_SIZE   ),
@@ -55,6 +70,7 @@ module instr_ram_wrap
     .be_i        ( be_i                       ),
     .bypass_en_i ( bypass_en_i                )
   );
+`endif
 
   boot_rom_wrap
   #(

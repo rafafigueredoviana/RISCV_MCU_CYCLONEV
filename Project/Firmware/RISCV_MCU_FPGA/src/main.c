@@ -11,16 +11,15 @@
 
 int main()
 {
-  
-  //enable gpio  interrupt
-  int_periph_enable(GPIO_EVENT);
 
   // Sets GPIO[1] IRQ type to Fall
   set_gpio_pin_irq_type(1, 0x2);
   // Enables GPIO[1] IRQ
   set_gpio_pin_irq_en(1, 1);
-  // Sets GPIO[0] pin to HIGH
-  set_gpio_pin_value(0, 1); 
+  // Sets GPIO[2] pin to HIGH
+  set_gpio_pin_value(2, 1); 
+  //enable gpio  interrupt
+  int_periph_enable(GPIO_EVENT);
 
 
   // int *pointer_ram;

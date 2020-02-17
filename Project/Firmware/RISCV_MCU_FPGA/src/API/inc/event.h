@@ -83,19 +83,19 @@
 #define TIMER_B_OVERFLOW        0x1E
 #define TIMER_B_OUTPUT_CMP      0x1F
 
-static inline void int_periph_enable(unsigned int periph_mask)
+static inline void int_periph_enable(int periph)
 {
-    IER |= (periph_mask);
+    IER |= (0x1 << periph);
 }
 
-static inline void int_periph_disable(unsigned int periph_mask)
+static inline void int_periph_disable(int periph)
 {
-    IER &= ~(periph_mask);
+    IER &= ~(0x1 << periph);
 }
 
-static inline void int_periph_clear(unsigned int periph_mask)
+static inline void int_periph_clear(int periph)
 {
-    ICP |= (periph_mask);
+    ICP |= (0x1 << periph);
 }
 
 #endif

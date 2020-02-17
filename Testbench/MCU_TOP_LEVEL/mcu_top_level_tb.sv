@@ -52,8 +52,17 @@ mcu_top_riscv mcu_top_inst (
 
 always @ (posedge GPIO_OUT[0]) begin
 
-  $display("GPIO[0] Edge trigger output sucess!");
-  GPIO_IN[1] = 1'd1;
+  $display("GPIO[0] System startup sucess!");
+  // GPIO_IN[1] = 1'd1;
+
+
+end
+
+
+always @ (posedge GPIO_OUT[2]) begin
+
+  $display("GPIO[2] Main program executed!");
+  // GPIO_IN[1] = 1'd1;
 
 
 end

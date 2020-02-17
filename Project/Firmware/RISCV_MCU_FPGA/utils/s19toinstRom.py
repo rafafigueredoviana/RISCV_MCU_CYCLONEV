@@ -38,18 +38,20 @@
 # //                 s19toslm                                                   //
 # ////////////////////////////////////////////////////////////////////////////////
 
+# Script edited to generate instruction ROM for simulation purposes.
+
 import sys
 import math
 import os
 
 
 if(len(sys.argv) < 2):
-    print "Usage s19toboot.py FILENAME"
+    print "Usage s19toinstRom.py FILENAME"
     quit()
 
 
-rom_size      = 548 # in words (32 bit)
-rom_start     = 0x00008000
+rom_size      = 0x8000 # in words (32 bit)
+rom_start     = 0x00000000
 rom_end       = rom_start + rom_size * 4 - 1
 
 
@@ -130,12 +132,12 @@ rom_end     = rom_end     >> 2
 ###############################################################################
 # open files
 ###############################################################################
-rom_file  = open("boot_code.cde", 'w')
-vlog_file = open("boot_code.sv",  'w')
+rom_file  = open("inst_rom_code.cde", 'w')
+vlog_file = open("inst_rom_code.sv",  'w')
 
 # prepare file
 vlog_file.write("""
-module boot_code
+module inst_ROM
 (
     input  logic        CLK,
     input  logic        RSTN,

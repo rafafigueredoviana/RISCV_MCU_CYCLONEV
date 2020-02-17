@@ -35,7 +35,7 @@ int main()
   jump_and_start((volatile int *)(INSTR_RAM_START_ADDR));
 
 
-  return 0;
+  // return 0;
 }
 
 
