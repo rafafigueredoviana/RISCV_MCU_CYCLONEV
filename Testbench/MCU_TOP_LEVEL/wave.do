@@ -73,8 +73,17 @@ add wave -noupdate -group {MCU AXI Master} -radix hexadecimal {/mcu_top_level_tb
 add wave -noupdate -expand -group GPIO -radix hexadecimal /mcu_top_level_tb/mcu_top_inst/apb_gpio_instance/GPIO_ADDR001
 add wave -noupdate -expand -group GPIO /mcu_top_level_tb/mcu_top_inst/apb_gpio_instance/PWDATA
 add wave -noupdate -expand -group GPIO /mcu_top_level_tb/mcu_top_inst/gpio_output
+add wave -noupdate -expand -group GPIO /mcu_top_level_tb/mcu_top_inst/gpio_input
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/PADDR
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/PWDATA
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/PWRITE
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/PSEL
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/PENABLE
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/irq_i
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/event_i
+add wave -noupdate -expand -group {Event Unit} /mcu_top_level_tb/mcu_top_inst/apb_event_unit_instance/irq_o
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {26941 ps} 0}
+WaveRestoreCursors {{Cursor 1} {34060 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 552
 configure wave -valuecolwidth 376
@@ -90,4 +99,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {105105 ps}
+WaveRestoreZoom {0 ps} {105 ns}

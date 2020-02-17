@@ -60,4 +60,4 @@ vsim RISCV_MCU.mcu_top_level_tb
 
 do ../wave.do
 
-run 30 ns
+run 100 ns

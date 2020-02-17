@@ -9,11 +9,13 @@ always #20 clk = ~clk;
 
 reg [31:0] GPIO_OUT;
 
+reg [31:0] GPIO_IN;
 
 initial begin
   clk = 0;
   reset_n = 0;
   fetch_en = 0;
+  GPIO_IN[31:0] = 32'd0;
   for (int i = 0; i < 10; i++)
     begin
       @(posedge clk );
@@ -42,7 +44,7 @@ mcu_top_riscv mcu_top_inst (
 
   // GPIO signals
 
-  .gpio_input           (),
+  .gpio_input           (GPIO_IN),
   .gpio_output          (GPIO_OUT),
   .gpio_direction       ()
 
@@ -51,6 +53,7 @@ mcu_top_riscv mcu_top_inst (
 always @ (posedge GPIO_OUT[0]) begin
 
   $display("GPIO[0] Edge trigger output sucess!");
+  GPIO_IN[1] = 1'd1;
 
 
 end
