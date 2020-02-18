@@ -25,10 +25,10 @@ module periph_bus_wrap
     APB_BUS.Master    gpio_master,
     //APB_BUS.Master    spi_master,
     //APB_BUS.Master    timer_master,
-    APB_BUS.Master    event_unit_master
+    APB_BUS.Master    event_unit_master,
     //APB_BUS.Master    i2c_master,
     //APB_BUS.Master    fll_master,
-    //APB_BUS.Master    soc_ctrl_master,
+    APB_BUS.Master    soc_ctrl_master
     //APB_BUS.Master    debug_master
 
     );

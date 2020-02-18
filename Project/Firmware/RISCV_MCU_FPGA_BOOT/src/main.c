@@ -25,12 +25,13 @@ int main()
   // on that information
   //-----------------------------------------------------------
 
-  BOOTREG = 0x00;
+  // BOOTREG = 0x00;
 
   //-----------------------------------------------------------
   // Done jump to main program
   //-----------------------------------------------------------
 
+  // while(1);
   //jump to program start address (instruction base address)
   jump_and_start((volatile int *)(INSTR_RAM_START_ADDR));
 

@@ -31,6 +31,7 @@ set APB_SOURCE "\
   $APB_COMPONENTS/apb_gpio \
   $APB_COMPONENTS/apb_node \
   $APB_COMPONENTS/apb_uart_sv \
+  $APB_COMPONENTS/apb_pulpino \
   "
 
 set AXI_SOURCE "\
