@@ -21,7 +21,8 @@ module inst_rom_wrap
     .CLK   ( clk                    ),
     .RSTN  ( rst_n                  ),
     .CSN   ( ~en_i                  ),
-    .A     ( addr_i[ADDR_WIDTH-1:2] ),
+    .A     ({{6{1'b0}}, addr_i[ADDR_WIDTH-1:2]}),
+  
     .Q     ( rdata_o                )
   );
  

@@ -46,7 +46,7 @@ module instr_ram_wrap
   (
     .clk     ( clk                         ),
     .rst_n   ( rst_n                       ),
-    .en_i    ( en_i & is_boot              ),
+    .en_i    ( en_i & ~is_boot              ),
     .addr_i  ( addr_i[ADDR_WIDTH-1:0] ),
     .rdata_o ( rdata_ram                  )
   );
