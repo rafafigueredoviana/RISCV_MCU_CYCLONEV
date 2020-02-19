@@ -15,6 +15,9 @@
 #include "event.h"
 
 
+
+
+
 //defining all interrupt handelrs
 //these functions can be redefined by users
 
@@ -26,9 +29,29 @@ void ISR_I2C (void){ for(;;); }
 __attribute__ ((weak))
 void ISR_UART (void){ for(;;); }	
 
+/*
+-------------------------------------------------
+            GPIO INT handler
+-------------------------------------------------
+*/
+
 // 25: gpio
 __attribute__ ((weak))
-void ISR_GPIO (void){ for(;;); }	
+void ISR_GPIO (void)
+{
+
+ (* callback_function_gpio)();
+
+}
+
+
+void cfg_gpio_cb (void *cb_gpio)
+{
+    callback_function_gpio = cb_gpio;
+}
+
+
+	
 
 // 26: spim end of transmission
 __attribute__ ((weak))
@@ -53,4 +76,5 @@ void ISR_TB_OVF (void){ for(;;); }
 // 31: timer B compare
 __attribute__ ((weak))
 void ISR_TB_CMP (void){ for(;;); }
+
 
