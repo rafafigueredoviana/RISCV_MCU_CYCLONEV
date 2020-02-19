@@ -39,7 +39,7 @@ if {[file isdirectory $sim_folder/$Project_name] == 0} {
 
 }
 
-cp ../config.sv rtl_wrap
+# cp ../config.sv rtl_wrap
 
 set source_rtl [glob -directory  rtl_wrap "*.*v"]
 
@@ -60,4 +60,4 @@ vsim RISCV_MCU.mcu_top_level_tb
 
 do ../wave.do
 
-run 30 ns
+run 40 ns

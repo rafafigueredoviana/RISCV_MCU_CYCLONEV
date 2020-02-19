@@ -25,10 +25,10 @@ module periph_bus_wrap
     APB_BUS.Master    gpio_master,
     //APB_BUS.Master    spi_master,
     //APB_BUS.Master    timer_master,
-    APB_BUS.Master    event_unit_master
+    APB_BUS.Master    event_unit_master,
     //APB_BUS.Master    i2c_master,
     //APB_BUS.Master    fll_master,
-    //APB_BUS.Master    soc_ctrl_master,
+    APB_BUS.Master    soc_ctrl_master
     //APB_BUS.Master    debug_master
 
     );
@@ -143,11 +143,11 @@ module periph_bus_wrap
 
   // SOC Control APB bus assign
 
-  /*APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_soc_ctrl (
+  APB_ASSIGN_BUS APB_ASSIGN_BUS_instance_soc_ctrl (
   .apb_master(soc_ctrl_master),
   .apb_slave(s_masters[7])
   );
-  */
+  
 
   //`APB_ASSIGN_MASTER(s_masters[7], soc_ctrl_master);
   assign s_start_addr[7] = `SOC_CTRL_START_ADDR;

@@ -11,3 +11,7 @@ all: #clean
 .PHONY: clean
 clean:
 	rm -r Simulation
+
+.PHONY: rebuild
+rebuild: clean
+	vsim -do build_simulation.tcl 
