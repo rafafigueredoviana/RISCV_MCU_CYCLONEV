@@ -16,16 +16,15 @@ void jump_and_start(volatile int *ptr);
 int main()
 {
   
-
-  // Sets GPIO[0] pin to HIGH
-  set_gpio_pin_value(0, 1); 
-
   //-----------------------------------------------------------
   // Set new boot address -> exceptions/interrupts/events rely
   // on that information
   //-----------------------------------------------------------
 
-  // BOOTREG = 0x00;
+  BOOTREG = 0x00;
+
+  // Sets GPIO[0] pin to HIGH
+  set_gpio_pin_value(0, 1); 
 
   //-----------------------------------------------------------
   // Done jump to main program

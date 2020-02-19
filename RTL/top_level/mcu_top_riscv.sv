@@ -415,7 +415,7 @@ axi_node_intf_wrap
 
   // Memory map      APB Bridge       DATA MEM      INST MEM 
   .start_addr_i ( { 32'h1A10_0000, 32'h0010_0000, 32'h0000_0000} ),
-  .end_addr_i   ( { 32'h1A11_FFFF, 32'h001F_FFFF, 32'h000F_FFFF} )
+  .end_addr_i   ( { 32'h1A1F_FFFF, 32'h001F_FFFF, 32'h000F_FFFF} )
 
 );
 
