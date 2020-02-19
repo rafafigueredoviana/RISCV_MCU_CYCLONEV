@@ -23,7 +23,7 @@
 
 #ifndef _INT_H_
 #define _INT_H_
-
+#define __riscv__
 #ifndef __riscv__
 #include "spr-defs.h"
 #endif

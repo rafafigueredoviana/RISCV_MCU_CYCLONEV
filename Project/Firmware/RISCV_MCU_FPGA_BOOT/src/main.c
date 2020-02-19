@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <event.h>
 #include <gpio.h>
-
+#include <int.h>
 #define DATA_RAM_BASE 	0x00100000
 #define APB_BASE_ADDR 	0x1A100000
 
@@ -25,6 +25,9 @@ int main()
 
   // Sets GPIO[0] pin to HIGH
   set_gpio_pin_value(0, 1); 
+
+  // Enable core INT
+  int_enable();
 
   //-----------------------------------------------------------
   // Done jump to main program

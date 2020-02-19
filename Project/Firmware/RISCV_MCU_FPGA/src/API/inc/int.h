@@ -24,6 +24,8 @@
 #ifndef _INT_H_
 #define _INT_H_
 
+#define __riscv__
+
 #ifndef __riscv__
 #include "spr-defs.h"
 #endif
@@ -74,6 +76,16 @@ static inline void int_enable(void) {
   mtspr(SPR_SR, mfspr(SPR_SR) | (SPR_SR_IEE));
 #endif
 }
+
+/*
+-------------------------------------------------
+            GPIO INT handler
+-------------------------------------------------
+*/
+
+static void (*callback_function_gpio)(); // Callback function pointer used after handling GPIO int
+
+void cfg_gpio_cb (void *cb_gpio);
 
 
 
